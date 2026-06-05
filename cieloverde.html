@@ -69,8 +69,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--g9);displ
 .ti>.tck,.ti>div>.tck{width:18px;height:18px;border-radius:5px;border:2px solid var(--g3);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;background:#fff;}
 .ti>.tck:hover,.ti>div>.tck:hover{border-color:var(--ol);}.ti>.tck.chk,.ti>div>.tck.chk{background:var(--old);border-color:var(--old);}
 .ti>.tck.chk::after,.ti>div>.tck.chk::after{content:'✓';color:#fff;font-size:11px;font-weight:700;}
-.tii{flex:1;min-width:0;overflow:hidden;}
-.tit{font-size:14px;font-weight:500;margin-bottom:3px;word-break:normal;overflow-wrap:anywhere;white-space:normal;min-width:0;}
+.tii{flex:1;min-width:0;overflow:hidden;word-break:break-word;}
+.tit{font-size:14px;font-weight:500;margin-bottom:3px;word-break:break-word;overflow-wrap:break-word;white-space:normal;min-width:0;hyphens:none;}
 .tit.done{text-decoration:line-through;color:var(--g5);}
 .tmeta{font-size:11px;color:var(--g5);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 .tac{display:flex;gap:4px;opacity:0;transition:opacity .15s;flex-shrink:0;}
@@ -231,6 +231,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--g9);displ
 /* ── SEMANA PANEL ── */
 .sem-dia{min-height:120px;display:flex;flex-direction:column;}
 .sem-dia-body{flex:1;overflow-y:auto;max-height:200px;}
+.pdet-grid{display:grid;grid-template-columns:1fr;gap:16px;align-items:start;}
+@media(min-width:600px){.pdet-grid{grid-template-columns:2fr 1fr;gap:18px;}}
 /* ── TIPOS DE ITEM ── */
 .ti-evento{background:#F0EEF8;border-left-color:#6A5AB0!important;}
 .ti-evento:hover{border-color:#9A8AD0;}
@@ -310,6 +312,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--g9);displ
           <button class="fb" onclick="ftBt('alta',this)">Alta prioridad</button>
           <button class="fb" onclick="ftBt('estrategia',this)" style="border-color:var(--ol);color:var(--old);">🎯 Estrategia</button>
           <button class="fb" onclick="ftBt('oportunidades',this)" style="border-color:#8A9AC0;color:#4A5580;">🤝 Oportunidades</button>
+          <button class="fb" onclick="ftBt('acciones',this)" style="border-color:var(--ol);color:var(--old);">✓ Acciones</button>
           <button class="fb" onclick="ftBt('eventos',this)" style="border-color:#8A8AC0;color:#4A4A90;">◷ Eventos</button>
         </div>
         <button class="btn btn-p btn-sm" onclick="abrirMT()">+ Nueva tarea</button>
@@ -723,7 +726,8 @@ function togFPNone(){fTP=fTP==='none'?null:'none';rTodo();}
 function rTodo(){let l=tareas.filter(t=>!t.done);const yo=CU==='JP'?'JP':'Julián';if(fTF==='yo')l=l.filter(t=>t.responsable===yo);else if(fTF==='jul'){const otro=CU==='JP'?'Julián':'JP';l=l.filter(t=>t.responsable===otro||t.responsable==='JP + Julián');}else if(fTF==='hoy')l=l.filter(t=>dH(t.fecha)<=0);else if(fTF==='sem')l=l.filter(t=>dH(t.fecha)>=0&&dH(t.fecha)<=7);else if(fTF==='alta')l=l.filter(t=>t.prioridad==='alta');
   else if(fTF==='estrategia')l=l.filter(t=>t.objetivo);
   else if(fTF==='oportunidades')l=l.filter(t=>t.oportunidad);
-  else if(fTF==='eventos')l=l.filter(t=>t.tipo==='evento');if(fTP==='none')l=l.filter(t=>!t.proyecto);else if(fTP==='empresa'){const eIds=proyectos.filter(p=>p.ubicacion==='empresa').map(p=>p.id);l=l.filter(t=>t.proyecto&&eIds.includes(t.proyecto));}else if(fTP)l=l.filter(t=>t.proyecto===fTP);const vencidas=l.filter(t=>dH(t.fecha)<0);const noVenc=l.filter(t=>dH(t.fecha)>=0);l=ord(noVenc);document.getElementById('tList').innerHTML=l.length?l.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas en este filtro</p></div>`;document.getElementById('htN').textContent=tComp.length;document.getElementById('htL').innerHTML=tComp.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('');
+  else if(fTF==='eventos')l=l.filter(t=>t.tipo==='evento');
+  else if(fTF==='acciones')l=l.filter(t=>t.tipo==='accion'||!t.tipo);if(fTP==='none')l=l.filter(t=>!t.proyecto);else if(fTP==='empresa'){const eIds=proyectos.filter(p=>p.ubicacion==='empresa').map(p=>p.id);l=l.filter(t=>t.proyecto&&eIds.includes(t.proyecto));}else if(fTP)l=l.filter(t=>t.proyecto===fTP);const vencidas=l.filter(t=>dH(t.fecha)<0);const noVenc=l.filter(t=>dH(t.fecha)>=0);l=ord(noVenc);document.getElementById('tList').innerHTML=l.length?l.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas en este filtro</p></div>`;document.getElementById('htN').textContent=tComp.length;document.getElementById('htL').innerHTML=tComp.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('');
   // Vencidas section
   const vsec=document.getElementById('vencSection');
   const vlist=document.getElementById('vencList');
@@ -765,9 +769,16 @@ function tiH(t){
   // Fecha/hora
   let fl='';
   if(esEvento&&t.hora){
-    fl=`<span class="ti-hora">◷ ${t.hora}</span>`;
+    const fechaEv=d===0?'Hoy':d===1?'Mañana':fF(t.fecha);
+    fl=`<span class="ti-hora">◷ ${t.hora}</span> <span style="color:var(--g5);font-size:11px;">${fechaEv}</span>`;
+  } else if(d<0){
+    fl=`<span style="color:var(--rj);font-weight:600;">Vencida</span>`;
+  } else if(d===0){
+    fl=`<span style="color:var(--rj);font-weight:600;">Hoy</span>`;
+  } else if(d===1){
+    fl=`<span style="color:#9A7A28;font-weight:600;">Mañana</span>`;
   } else {
-    fl=d<0?'🔴 Vencida':d===0?'🔴 Hoy':d===1?'🟡 Mañana':`📅 ${fF(t.fecha)}`;
+    fl=`<span style="color:var(--g5);">${fF(t.fecha)}</span>`;
   }
   // Badge tipo — siempre visible
   const tipoBadge=esEvento
@@ -784,9 +795,9 @@ function tiH(t){
   return`<div class="${tiClass}" id="ti${t.id}">
     <div class="tck" onclick="event.stopPropagation();comp(${t.id})"></div>
     <div class="tii" onclick="abrirDet(${t.id})" style="cursor:pointer;">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:3px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:3px;flex-wrap:nowrap;">
         <div class="tit" style="flex:1;min-width:0;">${t.titulo}</div>
-        ${tipoBadge}
+        <div style="flex-shrink:0;">${tipoBadge}</div>
       </div>
       <div class="tmeta">
         <span>${t.responsable}</span>
@@ -820,7 +831,7 @@ function pcH(p){const pend=tareas.filter(t=>!t.done&&t.proyecto===p.id);const ne
 function ftP(f,btn){fPF=f;document.querySelectorAll('#v-proy .fb').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');rProys();}
 function rProys(){let l=proyectos;if(fPF==='santiago')l=l.filter(p=>p.ubicacion==='santiago');else if(fPF==='costa')l=l.filter(p=>p.ubicacion==='costa');else if(fPF==='empresa')l=l.filter(p=>p.ubicacion==='empresa');else if(fPF==='activo')l=l.filter(p=>p.estado!=='cierre');document.getElementById('pList').innerHTML=l.length?l.map(p=>pcH(p)).join(''):`<div class="empty" style="grid-column:span 2;"><p>Sin proyectos</p></div>`;}
 function verP(id){const p=proyectos.find(x=>x.id===id);if(!p)return;const pend=tareas.filter(t=>!t.done&&t.proyecto===id);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;const fillC=gr>0.9?'#C07060':gr>0.75?'#C4A040':'var(--ol)';const eStates=['visita','diseño','presupuesto','preparacion','ejecucion','cierre'];const eSel='<select class="fsel" style="font-size:12px;width:auto;" onchange="cambE('+id+',this.value)">'+eStates.map(e=>'<option value="'+e+'"'+(p.estado===e?' selected':'')+'>'+eLbl(e)+'</option>').join('')+'</select>';
-  const fechaEditHTML='<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:var(--g5);">Término:</span><input type="date" class="fi2" value="'+(p.fechaTermino||'')+'" style="font-size:12px;width:auto;padding:4px 8px;" onchange="cambFecha('+id+',this.value)"></div>';const tH=pend.length?pend.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas — <button class="btn btn-g btn-sm" onclick="abrirMTenP(${id})">crear una</button></p></div>`;const comps=tComp.filter(t=>t.proyecto===id);document.getElementById('pdC').innerHTML=`<button class="btn btn-g btn-sm" onclick="nav('proy')" style="margin-bottom:16px;">← Proyectos</button><div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:start;"><div><div style="font-size:20px;font-weight:700;margin-bottom:3px;">${p.nombre}</div><div style="font-size:13px;color:var(--g5);margin-bottom:14px;">${p.cliente} · ${p.tipo} · ${p.ubicacion}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;"><div id="pdControls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="abrirMTenP(${id})"> Nueva tarea</button></div><div class="tl2" id="tProy">${tH}</div>${comps.length?`<div style="margin-top:12px;"><button class="ht2" onclick="togHP()"><span id="hpI" style="display:inline-block;transition:transform .2s;">›</span> Completadas (${comps.length})</button><div class="hl tl2" id="hpL">${comps.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('')}</div></div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
+  const fechaEditHTML='<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:var(--g5);">Término:</span><input type="date" class="fi2" value="'+(p.fechaTermino||'')+'" style="font-size:12px;width:auto;padding:4px 8px;" onchange="cambFecha('+id+',this.value)"></div>';const tH=pend.length?pend.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas — <button class="btn btn-g btn-sm" onclick="abrirMTenP(${id})">crear una</button></p></div>`;const comps=tComp.filter(t=>t.proyecto===id);document.getElementById('pdC').innerHTML=`<button class="btn btn-g btn-sm" onclick="nav('proy')" style="margin-bottom:16px;">← Proyectos</button><div class="pdet-grid"><div><div style="font-size:20px;font-weight:700;margin-bottom:3px;">${p.nombre}</div><div style="font-size:13px;color:var(--g5);margin-bottom:14px;">${p.cliente} · ${p.tipo} · ${p.ubicacion}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;"><div id="pdControls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="abrirMTenP(${id})"> Nueva tarea</button></div><div class="tl2" id="tProy">${tH}</div>${comps.length?`<div style="margin-top:12px;"><button class="ht2" onclick="togHP()"><span id="hpI" style="display:inline-block;transition:transform .2s;">›</span> Completadas (${comps.length})</button><div class="hl tl2" id="hpL">${comps.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('')}</div></div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
 function cambE(id,e){const p=proyectos.find(x=>x.id===id);if(!p)return;p.estado=e;save();toast(`Estado: ${eLbl(e)}`);}
 function archivarProy(id){
   const idx=proyectos.findIndex(x=>x.id===id);
@@ -1072,7 +1083,12 @@ function rCmdBriefing(){
       <div>${top5.length?top5.filter(t=>!(t.tipo==='evento'&&t.hora&&dH(t.fecha)===0)).slice(0,5).map(t=>{
         const d=dH(t.fecha);
         const esEv=t.tipo==='evento';
-        const fl=esEv&&t.hora?`<span style="color:#6A5AB0;font-weight:600;">◷ ${t.hora}</span>`:d<0?'<span style="color:#8C2A18;font-weight:600;">Atrasada</span>':d===0?'<span style="color:#8C2A18;font-weight:600;">Hoy</span>':d===1?'<span style="color:#7A5020;">Mañana</span>':`<span style="color:rgba(80,50,20,.7);">${fF(t.fecha)}</span>`;
+        let fl='';
+        if(esEv&&t.hora){const fechaEvB=dH(t.fecha)===0?'Hoy':dH(t.fecha)===1?'Mañana':fF(t.fecha);fl=`<span style="color:#6A5AB0;font-weight:600;">◷ ${t.hora}</span> <span style="color:rgba(80,50,20,.6);font-size:11px;">${fechaEvB}</span>`;}
+        else if(d<0){fl='<span style="color:#8C2A18;font-weight:600;">Atrasada</span>';}
+        else if(d===0){fl='<span style="color:#8C2A18;font-weight:600;">Hoy</span>';}
+        else if(d===1){fl='<span style="color:#7A5020;">Mañana</span>';}
+        else{fl=`<span style="color:rgba(80,50,20,.7);">${fF(t.fecha)}</span>`;}
         const enCurso=t.tipo==='accion'&&t.estado==='en-curso';
         const cursoTag=enCurso?'<span style="font-size:10px;color:var(--old);background:var(--olxl);padding:1px 6px;border-radius:10px;margin-left:4px;">En curso</span>':'';
         const tipoBrief=esEv
