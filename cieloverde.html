@@ -13,7 +13,8 @@
 #syncIndicator{animation:none;}
 #syncIndicator[title="Guardando..."]{animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--g9);display:flex;height:100vh;overflow:hidden;font-size:14px;}body.has-banner{padding-bottom:60px;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--g9);display:flex;height:100vh;overflow:hidden;font-size:14px;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+body.has-banner{padding-bottom:60px;}
 .sb{width:var(--sw);background:var(--sb);display:flex;flex-direction:column;flex-shrink:0;height:100vh;position:relative;z-index:10;transition:left .25s ease;}
 .sb-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.05);position:relative;}
 .sb-mark{width:32px;height:32px;background:var(--ol);border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
@@ -38,7 +39,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--g9);displ
 .ulg{margin-left:auto;background:rgba(255,255,255,.06);border:none;border-radius:6px;width:26px;height:26px;cursor:pointer;color:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:13px;}
 .ulg:hover{background:rgba(255,255,255,.12);color:#fff;}
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-.topbar{height:var(--hh);background:var(--bl);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0;box-shadow:var(--shadow-sm);position:relative;z-index:5;}
+.topbar{height:var(--hh);background:var(--bl);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0;box-shadow:var(--shadow-sm);position:relative;z-index:5;padding-left:max(22px,env(safe-area-inset-left));padding-right:max(22px,env(safe-area-inset-right));}
 .tl{display:flex;align-items:center;gap:10px;}
 .sbt{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--g7);padding:4px;width:40px;height:40px;align-items:center;justify-content:center;}
 .tt{font-size:15px;font-weight:700;letter-spacing:-.01em;}
@@ -1613,6 +1614,11 @@ function toast(msg){const el=document.getElementById('toast');el.textContent=msg
 function rAll(){rTodo();rProys();rOpps();rEst();rBj();}
 
 // ══ INIT ══
+// ── SERVICE WORKER ──
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
 document.addEventListener('DOMContentLoaded',async ()=>{
   // Detectar banner de tiiny.host y compensar
   setTimeout(()=>{
