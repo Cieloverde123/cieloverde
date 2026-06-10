@@ -505,7 +505,8 @@ body.has-banner{padding-bottom:60px;}
     <div class="fg"><label class="fl">Nombre</label><input class="fi2" id="pNom" placeholder="Ej: Jardín Las Condes"></div>
     <div class="fr2"><div class="fg"><label class="fl">Cliente</label><input class="fi2" id="pCli" placeholder="Nombre cliente"></div><div class="fg"><label class="fl">Tipo</label><select class="fsel" id="pTipo"><option value="jardín">Jardín</option><option value="riego">Riego</option><option value="terraza">Terraza</option><option value="paisajismo">Paisajismo</option><option value="empresa">Proyecto interno</option></select></div></div>
     <div class="fr2"><div class="fg"><label class="fl">Ubicación</label><select class="fsel" id="pUbi"><option value="santiago">Santiago</option><option value="costa">Costa</option><option value="empresa">Empresa</option></select></div><div class="fg"><label class="fl">Estado</label><select class="fsel" id="pEst"><option value="visita">Visita</option><option value="diseño">Diseño</option><option value="presupuesto">Presupuesto</option><option value="preparacion">Preparación</option><option value="ejecucion">Ejecución</option><option value="cierre">Cierre</option></select></div></div>
-    <div class="fr2"><div class="fg"><label class="fl">Asignado</label><select class="fsel" id="pAsig"><option value="JP">Juan Pablo</option><option value="Julián">Julián</option><option value="JP + Julián">JP + Julián</option></select></div><div class="fg"><label class="fl">Fecha término</label><input class="fi2" type="date" id="pFec"></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Asignado</label><select class="fsel" id="pAsig"><option value="JP">Juan Pablo</option><option value="Julián">Julián</option><option value="JP + Julián">JP + Julián</option></select></div><div class="fg"><label class="fl">Fecha inicio</label><input class="fi2" type="date" id="pFi" title="Cuándo empieza realmente el trabajo"></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Fecha término</label><input class="fi2" type="date" id="pFec"></div></div>
     <div class="fr2"><div class="fg"><label class="fl">Presupuesto ($)</label><input class="fi2" type="number" id="pPres" placeholder="0"></div><div class="fg"><label class="fl">Gastado ($)</label><input class="fi2" type="number" id="pGast" placeholder="0"></div></div>
   </div>
   <div class="mf"><button class="btn btn-g" onclick="cM('mP')">Cancelar</button><button class="btn btn-p" onclick="gP()"> Crear</button></div>
@@ -933,7 +934,12 @@ function pcH(p){const pend=tareas.filter(t=>!t.done&&t.proyecto===p.id);const ne
 function ftP(f,btn){fPF=f;document.querySelectorAll('#v-proy .fb').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');rProys();}
 function rProys(){let l=proyectos;if(fPF==='santiago')l=l.filter(p=>p.ubicacion==='santiago');else if(fPF==='costa')l=l.filter(p=>p.ubicacion==='costa');else if(fPF==='empresa')l=l.filter(p=>p.ubicacion==='empresa');else if(fPF==='activo')l=l.filter(p=>p.estado!=='cierre');document.getElementById('pList').innerHTML=l.length?l.map(p=>pcH(p)).join(''):`<div class="empty" style="grid-column:span 2;"><p>Sin proyectos</p></div>`;}
 function verP(id){const p=proyectos.find(x=>x.id===id);if(!p)return;const pend=tareas.filter(t=>!t.done&&t.proyecto===id);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;const fillC=gr>0.9?'#C07060':gr>0.75?'#C4A040':'var(--ol)';const eStates=['visita','diseño','presupuesto','preparacion','ejecucion','cierre'];const eSel='<select class="fsel" style="font-size:12px;width:auto;" onchange="cambE('+id+',this.value)">'+eStates.map(e=>'<option value="'+e+'"'+(p.estado===e?' selected':'')+'>'+eLbl(e)+'</option>').join('')+'</select>';
-  const fechaEditHTML='<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:11px;color:var(--g5);">Término:</span><input type="date" class="fi2" value="'+(p.fechaTermino||'')+'" style="font-size:12px;width:auto;padding:4px 8px;" onchange="cambFecha('+id+',this.value)"></div>';const tH=pend.length?pend.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas — <button class="btn btn-g btn-sm" onclick="abrirMTenP(${id})">crear una</button></p></div>`;const comps=tComp.filter(t=>t.proyecto===id);document.getElementById('pdC').innerHTML=`<button class="btn btn-g btn-sm" onclick="nav('proy')" style="margin-bottom:16px;">← Proyectos</button><div class="pdet-grid"><div><div style="font-size:20px;font-weight:700;margin-bottom:3px;">${p.nombre}</div><div style="font-size:13px;color:var(--g5);margin-bottom:14px;">${p.cliente} · ${p.tipo} · ${p.ubicacion}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;"><div id="pdControls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="abrirMTenP(${id})"> Nueva tarea</button></div><div class="tl2" id="tProy">${tH}</div>${comps.length?`<div style="margin-top:12px;"><button class="ht2" onclick="togHP()"><span id="hpI" style="display:inline-block;transition:transform .2s;">›</span> Completadas (${comps.length})</button><div class="hl tl2" id="hpL">${comps.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('')}</div></div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
+  const fechaEditHTML='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
+    '<span style="font-size:11px;color:var(--g5);">Inicio:</span>'+
+    '<input type="date" class="fi2" value="'+(p.fechaInicio||'')+'\" style=\"font-size:12px;width:auto;padding:4px 8px;\" onchange=\"cambFechaInicio(\'+id+\',this.value)\">'+
+    '<span style="font-size:11px;color:var(--g5);margin-left:8px;">Término:</span>'+
+    '<input type="date" class="fi2" value="'+(p.fechaTermino||'')+'\" style=\"font-size:12px;width:auto;padding:4px 8px;\" onchange=\"cambFecha(\'+id+\',this.value)\">'+
+    '</div>';onst tH=pend.length?pend.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas — <button class="btn btn-g btn-sm" onclick="abrirMTenP(${id})">crear una</button></p></div>`;const comps=tComp.filter(t=>t.proyecto===id);document.getElementById('pdC').innerHTML=`<button class="btn btn-g btn-sm" onclick="nav('proy')" style="margin-bottom:16px;">← Proyectos</button><div class="pdet-grid"><div><div style="font-size:20px;font-weight:700;margin-bottom:3px;">${p.nombre}</div><div style="font-size:13px;color:var(--g5);margin-bottom:14px;">${p.cliente} · ${p.tipo} · ${p.ubicacion}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;"><div id="pdControls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="abrirMTenP(${id})"> Nueva tarea</button></div><div class="tl2" id="tProy">${tH}</div>${comps.length?`<div style="margin-top:12px;"><button class="ht2" onclick="togHP()"><span id="hpI" style="display:inline-block;transition:transform .2s;">›</span> Completadas (${comps.length})</button><div class="hl tl2" id="hpL">${comps.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('')}</div></div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
 function cambE(id,e){const p=proyectos.find(x=>x.id===id);if(!p)return;p.estado=e;save();toast(`Estado: ${eLbl(e)}`);}
 function archivarProy(id){
   const idx=proyectos.findIndex(x=>x.id===id);
@@ -968,6 +974,12 @@ function eliminarProy(id){
   toast('Proyecto eliminado');
 }
 
+function cambFechaInicio(id,f){
+  const p=proyectos.find(x=>x.id===id);if(!p)return;
+  p.fechaInicio=f;
+  marcarCambio('proyectos',p);
+  save();toast('Fecha inicio actualizada ✓');
+}
 function cambFecha(id,f){const p=proyectos.find(x=>x.id===id);if(!p)return;p.fechaTermino=f;save();rCmdBriefing();toast(`Fecha actualizada: ${fF(f)}`);}
 function togHP(){const l=document.getElementById('hpL'),i=document.getElementById('hpI');if(!l||!i)return;l.classList.toggle('open');i.style.transform=l.classList.contains('open')?'rotate(90deg)':'';}
 function abrirMTenP(id){abrirMT(id);}
@@ -1346,7 +1358,9 @@ function rCmd(){
   let hdrM=`<div style="display:flex;margin-left:${LW}px;margin-bottom:4px;position:relative;height:14px;">`;
   for(let i=0;i<=tD;i++){const d=new Date(hoyD);d.setDate(d.getDate()+i);if(d.getDate()===1||i===0){const pct=i/tD*100;hdrM+=`<span style="position:absolute;left:${pct}%;font-size:10px;color:var(--g5);font-weight:600;transform:translateX(-50%);white-space:nowrap;">${ms2[d.getMonth()]}</span>`;}}
   hdrM+=`</div>`;
-  const ganttRow=(p)=>{const finP=p.fechaTermino?new Date(p.fechaTermino+'T00:00:00'):finD;const eMs=Math.min(finP-hoyD,finD-hoyD);if(eMs<=0)return'';const w=Math.max(eMs/(finD-hoyD)*100,1.5);const d=dH(p.fechaTermino);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;let bc='#7E7B46';if(d<0)bc='#C07060';else if(gr>0.85||d<=7)bc='#C4A040';return`<div class="gr"><div class="gl" title="${p.nombre}">${p.nombre}</div><div class="gt"><div class="gb" style="left:0;width:${w}%;background:${bc};" onclick="verP(${p.id})" title="${p.nombre} — ${fF(p.fechaTermino)}">${w>8?fF(p.fechaTermino):''}</div></div></div>`;};
+  const ganttRow=(p)=>{
+      const finP=p.fechaTermino?new Date(p.fechaTermino+'T00:00:00'):finD;
+      const iniP=p.fechaInicio?new Date(p.fechaInicio+'T00:00:00'):hoyD;const eMs=Math.min(finP-hoyD,finD-hoyD);if(eMs<=0)return'';const w=Math.max(eMs/(finD-hoyD)*100,1.5);const d=dH(p.fechaTermino);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;let bc='#7E7B46';if(d<0)bc='#C07060';else if(gr>0.85||d<=7)bc='#C4A040';return`<div class="gr"><div class="gl" title="${p.nombre}">${p.nombre}</div><div class="gt"><div class="gb" style="left:0;width:${w}%;background:${bc};" onclick="verP(${p.id})" title="${p.nombre} — ${fF(p.fechaTermino)}">${w>8?fF(p.fechaTermino):''}</div></div></div>`;};
   const proyClientes=pA.filter(p=>p.ubicacion!=='empresa');
   const proyEmpresa=pA.filter(p=>p.ubicacion==='empresa');
   const filas=`${proyClientes.length?`<div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Proyectos</div>${proyClientes.map(ganttRow).join('')}`:''}${proyEmpresa.length?`<div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 6px;">Empresa</div>${proyEmpresa.map(ganttRow).join('')}`:''}`;
@@ -1588,9 +1602,50 @@ function gT(){
   if(document.getElementById('v-pd').classList.contains('active')&&t.proyecto)verP(t.proyecto);
   toast('Tarea creada ✓');
 }
-function abrirMP(){abrirM('mP');}
-function gP(){const nom=document.getElementById('pNom').value.trim();if(!nom){toast('Escribe un nombre');return;}proyectos.push({id:uid(),nombre:nom,cliente:document.getElementById('pCli').value.trim()||'Sin cliente',tipo:document.getElementById('pTipo').value,ubicacion:document.getElementById('pUbi').value,estado:document.getElementById('pEst').value,asignado:document.getElementById('pAsig').value,fechaTermino:document.getElementById('pFec').value,presupuesto:parseFloat(document.getElementById('pPres').value)||0,gastado:parseFloat(document.getElementById('pGast').value)||0});save();cM('mP');rProys();rCmdBriefing();toast('Proyecto creado ✓');}
-function abrirMO(){oEI=null;document.getElementById('mOT').textContent='Nueva oportunidad';['oNom','oCli','oAcc','oFAc','oNota'].forEach(id=>document.getElementById(id).value='');document.getElementById('oMonto').value='';document.getElementById('oEst').value='visita-pendiente';abrirM('mO');}
+function abrirMP(){
+  // Limpiar todos los campos
+  document.getElementById('pNom').value='';
+  document.getElementById('pCli').value='';
+  document.getElementById('pTipo').value='jardín';
+  document.getElementById('pUb').value='santiago';
+  document.getElementById('pEst').value='visita';
+  document.getElementById('pAs').value='JP';
+  document.getElementById('pFi').value='';
+  document.getElementById('pFt').value='';
+  document.getElementById('pPp').value='';
+  document.getElementById('pGa').value='';
+  abrirM('mP');
+}
+function gP(){
+  const nom=document.getElementById('pNom').value.trim();
+  if(!nom){toast('Escribe un nombre');return;}
+  const p={
+    id:uid(),
+    nombre:nom,
+    cliente:document.getElementById('pCli').value.trim()||'Sin cliente',
+    tipo:document.getElementById('pTipo').value,
+    ubicacion:document.getElementById('pUb').value,
+    estado:document.getElementById('pEst').value,
+    asignado:document.getElementById('pAs').value,
+    fechaInicio:document.getElementById('pFi').value||'',
+    fechaTermino:document.getElementById('pFt').value||'',
+    presupuesto:parseInt(document.getElementById('pPp').value)||0,
+    gastado:parseInt(document.getElementById('pGa').value)||0
+  };
+  proyectos.push(p);
+  marcarCambio('proyectos',p);
+  save();nav('pd');verP(p.id);toast('Proyecto guardado ✓');
+}
+function abrirMO(){
+  // Limpiar campos
+  const campos=['oNom','oCli','oMon','oAcc','oNot'];
+  campos.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const oEst=document.getElementById('oEst');if(oEst)oEst.value='visita-pendiente';
+  const oFa=document.getElementById('oFa');if(oFa)oFa.value='';
+  document.getElementById('mOTit').textContent='Nueva oportunidad';
+  oId=null;
+  abrirM('mO');
+}
 function editO(id){const o=[...opps,...oppsG,...oppsP].find(x=>x.id===id);if(!o)return;oEI=id;document.getElementById('mOT').textContent='Editar oportunidad';document.getElementById('oNom').value=o.nombre;document.getElementById('oCli').value=o.cliente;document.getElementById('oEst').value=o.estado;document.getElementById('oMonto').value=o.monto||'';document.getElementById('oAcc').value=o.accion||'';document.getElementById('oFAc').value=o.fechaAccion||'';document.getElementById('oNota').value=o.nota||'';abrirM('mO');}
 function gO(){const nom=document.getElementById('oNom').value.trim();if(!nom){toast('Escribe un nombre');return;}const data={nombre:nom,cliente:document.getElementById('oCli').value.trim(),estado:document.getElementById('oEst').value,monto:parseFloat(document.getElementById('oMonto').value)||0,accion:document.getElementById('oAcc').value.trim(),fechaAccion:document.getElementById('oFAc').value,nota:document.getElementById('oNota').value.trim()};if(oEI){let arr=opps;let i=arr.findIndex(x=>x.id===oEI);if(i<0){arr=oppsG;i=arr.findIndex(x=>x.id===oEI);}if(i<0){arr=oppsP;i=arr.findIndex(x=>x.id===oEI);}if(i>=0){const upd={...arr[i],...data};arr.splice(i,1);if(data.estado==='ganado')oppsG.push(upd);else if(data.estado==='perdido')oppsP.push(upd);else opps.push(upd);}}else{const n={id:uid(),...data};if(data.estado==='ganado')oppsG.push(n);else if(data.estado==='perdido')oppsP.push(n);else opps.push(n);}save();cM('mO');rOpps();rCmdBriefing();
   // Si se marcó como ganada, ofrecer crear proyecto
@@ -1609,7 +1664,13 @@ function gO(){const nom=document.getElementById('oNom').value.trim();if(!nom){to
 }
 function abrirMCap(){document.getElementById('capTxt').value='';abrirM('mCap');}
 function gCap(){const txt=document.getElementById('capTxt').value.trim();if(!txt){toast('Escribe algo');return;}bandeja.push({id:uid(),texto:txt,fecha:hoy()});save();cM('mCap');rBj();const b=document.getElementById('bjBdg');b.textContent=bandeja.length;b.style.display='inline';toast('Idea capturada ✓');}
-function abrirMObj(){abrirM('mObj');}
+function abrirMObj(){
+  const t=document.getElementById('objTit');if(t)t.value='';
+  const d=document.getElementById('objDesc');if(d)d.value='';
+  document.getElementById('mObjTit').textContent='Nuevo objetivo';
+  objEId=null;
+  abrirM('mObj');
+}
 function gObj(){const t=document.getElementById('objTit').value.trim();if(!t){toast('Escribe un objetivo');return;}if(objetivos.length>=7){toast('Máximo 7 objetivos');return;}objetivos.push({id:uid(),titulo:t,descripcion:document.getElementById('objDesc').value.trim()});save();cM('mObj');document.getElementById('objTit').value='';document.getElementById('objDesc').value='';rEst();toast('Objetivo creado ✓');}
 function editObj(id){
   const o=objetivos.find(x=>x.id===id);if(!o)return;
