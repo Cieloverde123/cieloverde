@@ -1,9 +1,4 @@
-// ══════════════════════════════════════════════
-// CIELO VERDE — Service Worker
-// Permite funcionamiento básico offline
-// ══════════════════════════════════════════════
-
-const CACHE = 'cv-v1';
+const CACHE = 'cv-v2';
 const ASSETS = ['./cieloverde.html'];
 
 self.addEventListener('install', e => {
@@ -23,10 +18,10 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Siempre intentar red primero — caché solo como fallback
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        // Actualizar caché con versión nueva
         const clone = res.clone();
         caches.open(CACHE).then(cache => cache.put(e.request, clone));
         return res;
