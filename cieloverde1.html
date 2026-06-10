@@ -503,8 +503,17 @@ body.has-banner{padding-bottom:60px;}
   <div class="mh"><div class="mt2">Nuevo proyecto</div><button class="mc" onclick="cM('mP')">✕</button></div>
   <div class="mb2">
     <div class="fg"><label class="fl">Nombre</label><input class="fi2" id="pNom" placeholder="Ej: Jardín Las Condes"></div>
-    <div class="fr2"><div class="fg"><label class="fl">Cliente</label><input class="fi2" id="pCli" placeholder="Nombre cliente"></div><div class="fg"><label class="fl">Tipo</label><select class="fsel" id="pTipo"><option value="jardín">Jardín</option><option value="riego">Riego</option><option value="terraza">Terraza</option><option value="paisajismo">Paisajismo</option><option value="empresa">Proyecto interno</option></select></div></div>
-    <div class="fr2"><div class="fg"><label class="fl">Ubicación</label><select class="fsel" id="pUbi"><option value="santiago">Santiago</option><option value="costa">Costa</option><option value="empresa">Empresa</option></select></div><div class="fg"><label class="fl">Estado</label><select class="fsel" id="pEst"><option value="visita">Visita</option><option value="diseño">Diseño</option><option value="presupuesto">Presupuesto</option><option value="preparacion">Preparación</option><option value="ejecucion">Ejecución</option><option value="cierre">Cierre</option></select></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Cliente</label><input class="fi2" id="pCli" placeholder="Ej: González" oninput="sugerirNombreP()"></div><div class="fg"><label class="fl">Tipo</label><select class="fsel" id="pTipo" onchange="sugerirNombreP()"><option value="diseño-construccion">Diseño + Construcción</option>
+<option value="diseño-construccion-riego">Diseño + Construcción + Riego</option>
+<option value="solo-construccion">Solo construcción</option>
+<option value="solo-riego">Solo riego</option>
+<option value="mantencion">Mantención</option>
+<option value="asesoria">Asesoría</option>
+<option value="interno">Proyecto interno</option></select></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Ubicación</label><select class="fsel" id="pUbi" onchange="sugerirNombreP()"><option value="santiago">Santiago</option><option value="costa">Costa</option><option value="empresa">Empresa</option></select></div><div class="fg"><label class="fl">Estado</label><select class="fsel" id="pEst"><option value="diseño">Diseño</option>
+<option value="preparacion">Preparación</option>
+<option value="ejecucion">Ejecución</option>
+<option value="cierre">Cierre</option></select></div></div>
     <div class="fr2"><div class="fg"><label class="fl">Asignado</label><select class="fsel" id="pAsig"><option value="JP">Juan Pablo</option><option value="Julián">Julián</option><option value="JP + Julián">JP + Julián</option></select></div><div class="fg"><label class="fl">Fecha inicio</label><input class="fi2" type="date" id="pFi" title="Cuándo empieza realmente el trabajo"></div></div>
     <div class="fr2"><div class="fg"><label class="fl">Fecha término</label><input class="fi2" type="date" id="pFec"></div></div>
     <div class="fr2"><div class="fg"><label class="fl">Presupuesto ($)</label><input class="fi2" type="number" id="pPres" placeholder="0"></div><div class="fg"><label class="fl">Gastado ($)</label><input class="fi2" type="number" id="pGast" placeholder="0"></div></div>
@@ -532,7 +541,7 @@ body.has-banner{padding-bottom:60px;}
 </div></div>
 <!-- MODAL OBJETIVO -->
 <div class="mo" id="mObj"><div class="mbox" style="max-width:440px;">
-  <div class="mh"><div class="mt2">Nuevo objetivo</div><button class="mc" onclick="cM('mObj')">✕</button></div>
+  <div class="mh"><div class="mt2" id="mObjTit">Nuevo objetivo</div><button class="mc" onclick="cM('mObj')">✕</button></div>
   <div class="mb2">
     <div class="fg"><label class="fl">Objetivo</label><input class="fi2" id="objTit" placeholder="Ej: Consolidar presencia en la Costa"></div>
     <div class="fg"><label class="fl">Descripción breve</label><input class="fi2" id="objDesc" placeholder="Qué significa lograrlo"></div>
@@ -542,7 +551,7 @@ body.has-banner{padding-bottom:60px;}
 <div class="toast" id="toast"></div>
 <script>
 // ══ ESTADO ══
-let CU=null,pS='media',pDS='media',dId=null,fTF='todos',fTP=null,fPF='todos',fOF='todos',cS=8,fabO=false,oEI=null,IDC=500;
+let CU=null,pS='media',pDS='media',dId=null,fTF='todos',fTP=null,fPF='todos',fOF='todos',cS=8,fabO=false,oEI=null,objEId=null,IDC=500;
 function uid(){
   IDC=Math.max(IDC, parseInt(localStorage.getItem('cv9_idc')||'0'));
   IDC++;
@@ -557,6 +566,15 @@ function sc(t){let s=0;if(t.prioridad==='alta')s+=100;else if(t.prioridad==='med
 function ord(l){return[...l].sort((a,b)=>sc(b)-sc(a));}
 function pN(id){if(!id)return'General';if(id==='empresa_general')return'🏢 Empresa';const p=proyectos.find(x=>x.id===id);return p?p.nombre:'General';}
 function nC(n,m=22){return n&&n.length>m?n.substring(0,m)+'…':n||'';}
+function tLbl(t){return{
+  'diseño-construccion':'D+C',
+  'diseño-construccion-riego':'D+C+R',
+  'solo-construccion':'Construcción',
+  'solo-riego':'Solo riego',
+  'mantencion':'Mantención',
+  'asesoria':'Asesoría',
+  'interno':'Interno'
+}[t]||t;}
 function eLbl(e){return{ejecucion:'Ejecución',diseño:'Diseño',presupuesto:'Presupuesto',preparacion:'Preparación',cierre:'Cierre',visita:'Visita'}[e]||e;}
 function eCSS(e){return{ejecucion:'ee',diseño:'ed',presupuesto:'ep',preparacion:'epr',cierre:'ec',visita:'ev'}[e]||'ev';}
 function oLbl(e){return{'visita-pendiente':'Visita pendiente','presupuesto-prep':'Presup. en prep.','presupuesto-enviado':'Presup. enviado','esperando':'Esperando resp.','ganado':'Ganado','perdido':'Perdido'}[e]||e;}
@@ -933,13 +951,13 @@ function sPD(p){pDS=p;document.querySelectorAll('#dT .po').forEach(b=>b.classLis
 function pcH(p){const pend=tareas.filter(t=>!t.done&&t.proyecto===p.id);const next=ord(pend)[0];const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;const dotC=gr>0.9?'#C07060':gr>0.75?'#C4A040':'#5A9050';const avs=p.asignado.split(' + ').map(a=>`<div class="av ${a==='Julián'?'jul':''}">${a==='JP'?'JP':'JL'}</div>`).join('');const nx=next?`<div class="pcnx">→${nC(next.titulo,42)}</div>`:`<div class="pcnx vac">⚠Sin tareas pendientes</div>`;return`<div class="pc" onclick="verP(${p.id})"><div class="pct"><div><div class="pcn">${p.nombre}</div><div class="pcm">${p.cliente} · ${fF(p.fechaTermino)}</div></div><span class="pe ${eCSS(p.estado)}">${eLbl(p.estado)}</span></div>${nx}<div class="pcf"><div class="pavs">${avs}</div><div style="font-size:11px;color:var(--g5);display:flex;align-items:center;gap:5px;"><span style="width:7px;height:7px;border-radius:50%;background:${dotC};display:inline-block;"></span>${p.presupuesto>0?Math.round(gr*100)+'% pres.':'Sin pres.'}</div></div></div>`;}
 function ftP(f,btn){fPF=f;document.querySelectorAll('#v-proy .fb').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');rProys();}
 function rProys(){let l=proyectos;if(fPF==='santiago')l=l.filter(p=>p.ubicacion==='santiago');else if(fPF==='costa')l=l.filter(p=>p.ubicacion==='costa');else if(fPF==='empresa')l=l.filter(p=>p.ubicacion==='empresa');else if(fPF==='activo')l=l.filter(p=>p.estado!=='cierre');document.getElementById('pList').innerHTML=l.length?l.map(p=>pcH(p)).join(''):`<div class="empty" style="grid-column:span 2;"><p>Sin proyectos</p></div>`;}
-function verP(id){const p=proyectos.find(x=>x.id===id);if(!p)return;const pend=tareas.filter(t=>!t.done&&t.proyecto===id);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;const fillC=gr>0.9?'#C07060':gr>0.75?'#C4A040':'var(--ol)';const eStates=['visita','diseño','presupuesto','preparacion','ejecucion','cierre'];const eSel='<select class="fsel" style="font-size:12px;width:auto;" onchange="cambE('+id+',this.value)">'+eStates.map(e=>'<option value="'+e+'"'+(p.estado===e?' selected':'')+'>'+eLbl(e)+'</option>').join('')+'</select>';
+function verP(id){const p=proyectos.find(x=>x.id===id);if(!p)return;const pend=tareas.filter(t=>!t.done&&t.proyecto===id);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;const fillC=gr>0.9?'#C07060':gr>0.75?'#C4A040':'var(--ol)';const eStates=['diseño','preparacion','ejecucion','cierre'];const eSel='<select class="fsel" style="font-size:12px;width:auto;" onchange="cambE('+id+',this.value)">'+eStates.map(e=>'<option value="'+e+'"'+(p.estado===e?' selected':'')+'>'+eLbl(e)+'</option>').join('')+'</select>';
   const fechaEditHTML='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">'+
     '<span style="font-size:11px;color:var(--g5);">Inicio:</span>'+
     '<input type="date" class="fi2" value="'+(p.fechaInicio||'')+'\" style=\"font-size:12px;width:auto;padding:4px 8px;\" onchange=\"cambFechaInicio(\'+id+\',this.value)\">'+
     '<span style="font-size:11px;color:var(--g5);margin-left:8px;">Término:</span>'+
     '<input type="date" class="fi2" value="'+(p.fechaTermino||'')+'\" style=\"font-size:12px;width:auto;padding:4px 8px;\" onchange=\"cambFecha(\'+id+\',this.value)\">'+
-    '</div>';onst tH=pend.length?pend.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas — <button class="btn btn-g btn-sm" onclick="abrirMTenP(${id})">crear una</button></p></div>`;const comps=tComp.filter(t=>t.proyecto===id);document.getElementById('pdC').innerHTML=`<button class="btn btn-g btn-sm" onclick="nav('proy')" style="margin-bottom:16px;">← Proyectos</button><div class="pdet-grid"><div><div style="font-size:20px;font-weight:700;margin-bottom:3px;">${p.nombre}</div><div style="font-size:13px;color:var(--g5);margin-bottom:14px;">${p.cliente} · ${p.tipo} · ${p.ubicacion}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;"><div id="pdControls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="abrirMTenP(${id})"> Nueva tarea</button></div><div class="tl2" id="tProy">${tH}</div>${comps.length?`<div style="margin-top:12px;"><button class="ht2" onclick="togHP()"><span id="hpI" style="display:inline-block;transition:transform .2s;">›</span> Completadas (${comps.length})</button><div class="hl tl2" id="hpL">${comps.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('')}</div></div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
+    '</div>';const tH=pend.length?pend.map(t=>tiH(t)).join(''):`<div class="empty">✓<p>Sin tareas — <button class="btn btn-g btn-sm" onclick="abrirMTenP(${id})">crear una</button></p></div>`;const comps=tComp.filter(t=>t.proyecto===id);document.getElementById('pdC').innerHTML=`<button class="btn btn-g btn-sm" onclick="nav('proy')" style="margin-bottom:16px;">← Proyectos</button><div class="pdet-grid"><div><div style="font-size:20px;font-weight:700;margin-bottom:3px;">${p.nombre}</div><div style="font-size:13px;color:var(--g5);margin-bottom:14px;">${p.cliente} · ${p.tipo} · ${p.ubicacion}</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;"><div id="pdControls" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><button class="btn btn-p btn-sm" onclick="abrirMTenP(${id})"> Nueva tarea</button></div><div class="tl2" id="tProy">${tH}</div>${comps.length?`<div style="margin-top:12px;"><button class="ht2" onclick="togHP()"><span id="hpI" style="display:inline-block;transition:transform .2s;">›</span> Completadas (${comps.length})</button><div class="hl tl2" id="hpL">${comps.slice().reverse().map(t=>`<div class="ti done" style="cursor:default;border-left-color:var(--g3)!important;"><div class="tck chk"></div><div class="tii"><div class="tit done">${t.titulo}</div><div class="tmeta"><span>${t.responsable}</span><span>✓ ${fF(t.fechaComp)}</span></div></div></div>`).join('')}</div></div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
 function cambE(id,e){const p=proyectos.find(x=>x.id===id);if(!p)return;p.estado=e;save();toast(`Estado: ${eLbl(e)}`);}
 function archivarProy(id){
   const idx=proyectos.findIndex(x=>x.id===id);
@@ -1602,18 +1620,28 @@ function gT(){
   if(document.getElementById('v-pd').classList.contains('active')&&t.proyecto)verP(t.proyecto);
   toast('Tarea creada ✓');
 }
+function sugerirNombreP(){
+  const cli=(document.getElementById('pCli')?.value||'').trim();
+  const tipo=document.getElementById('pTipo')?.value||'';
+  const ubi=document.getElementById('pUbi')?.value||'';
+  if(!cli) return;
+  const tipoLabel=tLbl(tipo)||tipo;
+  const ubiLabel=ubi==='costa'?'Costa':ubi==='empresa'?'':'Santiago';
+  const nomEl=document.getElementById('pNom');
+  if(!nomEl||nomEl.value) return; // No sobreescribir si ya tiene nombre
+  nomEl.value=`${cli} — ${tipoLabel}${ubiLabel?' — '+ubiLabel:''}`;
+}
+
 function abrirMP(){
   // Limpiar todos los campos
-  document.getElementById('pNom').value='';
-  document.getElementById('pCli').value='';
-  document.getElementById('pTipo').value='jardín';
-  document.getElementById('pUb').value='santiago';
-  document.getElementById('pEst').value='visita';
-  document.getElementById('pAs').value='JP';
-  document.getElementById('pFi').value='';
-  document.getElementById('pFt').value='';
-  document.getElementById('pPp').value='';
-  document.getElementById('pGa').value='';
+  ['pNom','pCli'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const pTipo=document.getElementById('pTipo');if(pTipo)pTipo.value='jardín';
+  const pUbi=document.getElementById('pUbi');if(pUbi)pUbi.value='santiago';
+  const pEst=document.getElementById('pEst');if(pEst)pEst.value='diseño';
+  const pAsig=document.getElementById('pAsig');if(pAsig)pAsig.value='JP';
+  const pFi=document.getElementById('pFi');if(pFi)pFi.value='';
+  const pFec=document.getElementById('pFec');if(pFec)pFec.value='';
+  const pPres=document.getElementById('pPres');if(pPres)pPres.value='';
   abrirM('mP');
 }
 function gP(){
@@ -1624,13 +1652,13 @@ function gP(){
     nombre:nom,
     cliente:document.getElementById('pCli').value.trim()||'Sin cliente',
     tipo:document.getElementById('pTipo').value,
-    ubicacion:document.getElementById('pUb').value,
+    ubicacion:document.getElementById('pUbi')?.value||'santiago',
     estado:document.getElementById('pEst').value,
-    asignado:document.getElementById('pAs').value,
-    fechaInicio:document.getElementById('pFi').value||'',
-    fechaTermino:document.getElementById('pFt').value||'',
-    presupuesto:parseInt(document.getElementById('pPp').value)||0,
-    gastado:parseInt(document.getElementById('pGa').value)||0
+    asignado:document.getElementById('pAsig')?.value||'JP',
+    fechaInicio:document.getElementById('pFi')?.value||'',
+    fechaTermino:document.getElementById('pFec')?.value||'',
+    presupuesto:parseInt(document.getElementById('pPres')?.value)||0,
+    gastado:0
   };
   proyectos.push(p);
   marcarCambio('proyectos',p);
@@ -1642,7 +1670,7 @@ function abrirMO(){
   campos.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const oEst=document.getElementById('oEst');if(oEst)oEst.value='visita-pendiente';
   const oFa=document.getElementById('oFa');if(oFa)oFa.value='';
-  document.getElementById('mOTit').textContent='Nueva oportunidad';
+  document.getElementById('mOT').textContent='Nueva oportunidad';
   oId=null;
   abrirM('mO');
 }
@@ -1654,7 +1682,7 @@ function gO(){const nom=document.getElementById('oNom').value.trim();if(!nom){to
       // Verificar que no existe ya un proyecto con ese nombre
       const yaExiste=proyectos.some(p=>p.nombre===nom);
       if(yaExiste){toast('Ya existe un proyecto con ese nombre');return;}
-      const nP={id:uid(),nombre:nom,cliente:data.cliente||'Sin cliente',tipo:'jardín',ubicacion:'santiago',estado:'diseño',asignado:'JP',fechaTermino:hP(90),presupuesto:data.monto||0,gastado:0};
+      const nP={id:uid(),nombre:nom,cliente:data.cliente||'Sin cliente',tipo:'diseño-construccion',ubicacion:'santiago',estado:'diseño',asignado:'JP',fechaTermino:hP(90),presupuesto:data.monto||0,gastado:0};
       proyectos.push(nP);save();rProys();rCmdBriefing();
       toast('✓ Proyecto "'+nom+'" creado — revísalo en Proyectos');
     },300);
