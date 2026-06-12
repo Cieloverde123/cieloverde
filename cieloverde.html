@@ -718,20 +718,26 @@ async function cargarDesdeSheets(){
     const sheetsTS = d.config ? 
       new Date(d.config.find?.(x=>x[0]==='lastUpdate')?.[1]||0).getTime() : 0;
     
-    // Solo cargar desde Sheets si es MÁS NUEVO que localStorage
-    if(sheetsTS > localTS){
-      if(d.proyectos)   proyectos = d.proyectos;
-      if(d.tareas)      tareas = d.tareas;
-      if(d.tareasComp)  tComp = d.tareasComp;
-      if(d.opps)        opps = d.opps;
-      if(d.oppsG)       oppsG = d.oppsG;
-      if(d.oppsP)       oppsP = d.oppsP;
-      if(d.objetivos)   objetivos = d.objetivos;
-      if(d.bandeja)     bandeja = d.bandeja;
+    // Sheets es la fuente de verdad — siempre cargar
+    // EXCEPTO si hay cambios locales pendientes sin sincronizar
+    const hayPendientes = Object.values(_pendingChanges).some(arr=>arr.length>0);
+    if(!hayPendientes || sheetsTS > localTS){
+      // Sin cambios locales pendientes → Sheets manda
+      // O Sheets más nuevo → cargar igualmente
+      if(d.proyectos)     proyectos = d.proyectos;
+      if(d.tareas)        tareas = d.tareas;
+      if(d.tareasComp)    tComp = d.tareasComp;
+      if(d.opps)          opps = d.opps;
+      if(d.oppsG)         oppsG = d.oppsG;
+      if(d.oppsP)         oppsP = d.oppsP;
+      if(d.objetivos)     objetivos = d.objetivos;
+      if(d.bandeja)       bandeja = d.bandeja;
       if(d.proyectosArch) proyectosArch = d.proyectosArch;
-      console.log('Cargado desde Sheets (más nuevo):', new Date(sheetsTS).toISOString());
+      // Actualizar timestamp local al de Sheets
+      if(sheetsTS) localStorage.setItem('cv10_ts', sheetsTS);
     } else {
-      console.log('Manteniendo datos locales (más nuevos o iguales)');
+      // Hay cambios locales pendientes — mantener local y sincronizar primero
+      console.log('Hay cambios pendientes — sincronizando primero');
     }
     if(d.config){
       const viz = d.config.find(x=>x[0]==='vision');
