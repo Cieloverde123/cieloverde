@@ -377,9 +377,9 @@ body.has-banner{padding-bottom:60px;}
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
         <div><div style="font-size:16px;font-weight:700;">Vista Comando</div><div style="font-size:12px;color:var(--g5);">¿Podemos aceptar más trabajo?</div></div>
         <div style="display:flex;gap:6px;">
-          <button class="fb active" onclick="setCS(8,this)">8 sem</button>
-          <button class="fb" onclick="setCS(12,this)">12 sem</button>
-          <button class="fb" onclick="setCS(16,this)">16 sem</button>
+          <button class="fb" onclick="setCS(4,this)">1 mes</button>
+          <button class="fb active" onclick="setCS(13,this)">3 meses</button>
+          <button class="fb" onclick="setCS(26,this)">6 meses</button>
         </div>
       </div>
       <!-- BRIEFING PERSONAL -->
@@ -565,7 +565,7 @@ body.has-banner{padding-bottom:60px;}
 <div class="toast" id="toastEl"></div>
 <script>
 // ══ ESTADO ══
-let CU=null,pS='media',pDS='media',dId=null,fTF='todos',fTP=null,fPF='todos',fOF='todos',cS=8,fabO=false,oEI=null,objEId=null,IDC=500;
+let CU=null,pS='media',pDS='media',dId=null,fTF='todos',fTP=null,fPF='todos',fOF='todos',cS=13,fabO=false,oEI=null,objEId=null,IDC=500;
 function uid(){
   IDC=Math.max(IDC, parseInt(localStorage.getItem('cv10_idc')||'0'));
   IDC++;
@@ -843,7 +843,11 @@ function togFPEmpresa(){
   rTodo();
 }
 function togFPNone(){fTP=fTP==='none'?null:'none';rTodo();}
-function rTodo(){let l=tareas.filter(t=>!t.done);const yo=CU==='JP'?'JP':'Julián';if(fTF==='yo')l=l.filter(t=>t.responsable===yo||t.responsable==='JP + Julián');else if(fTF==='jul'){const otro=CU==='JP'?'Julián':'JP';l=l.filter(t=>t.responsable===otro||t.responsable==='JP + Julián');}else if(fTF==='hoy')l=l.filter(t=>dH(t.fecha)<=0);else if(fTF==='sem')l=l.filter(t=>dH(t.fecha)>=0&&dH(t.fecha)<=7);else if(fTF==='alta')l=l.filter(t=>t.prioridad==='alta');
+function rTodo(){let l=tareas.filter(t=>!t.done);
+  const busqEl=document.getElementById('buscarTodo');
+  const busq=busqEl?busqEl.value.trim().toLowerCase():'';
+  if(busq)l=l.filter(t=>(t.titulo||'').toLowerCase().includes(busq)||(t.nota||'').toLowerCase().includes(busq)||pN(t.proyecto).toLowerCase().includes(busq)||(t.responsable||'').toLowerCase().includes(busq));
+  const yo=CU==='JP'?'JP':'Julián';if(fTF==='yo')l=l.filter(t=>t.responsable===yo||t.responsable==='JP + Julián');else if(fTF==='jul'){const otro=CU==='JP'?'Julián':'JP';l=l.filter(t=>t.responsable===otro||t.responsable==='JP + Julián');}else if(fTF==='hoy')l=l.filter(t=>dH(t.fecha)<=0);else if(fTF==='sem')l=l.filter(t=>dH(t.fecha)>=0&&dH(t.fecha)<=7);else if(fTF==='alta')l=l.filter(t=>t.prioridad==='alta');
   else if(fTF==='estrategia')l=l.filter(t=>t.objetivo);
   else if(fTF==='oportunidades')l=l.filter(t=>t.oportunidad);
   else if(fTF==='eventos')l=l.filter(t=>t.tipo==='evento');
@@ -1110,7 +1114,7 @@ function verP(id){const p=proyectos.find(x=>x.id===id);if(!p)return;const pend=t
             </div>
       </div>`).join('')}
   </div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
-function cambE(id,e){const p=proyectos.find(x=>x.id===id);if(!p)return;p.estado=e;save();toast(`Estado: ${eLbl(e)}`);}
+function cambE(id,e){const p=proyectos.find(x=>x.id===id);if(!p)return;p.estado=e;marcarCambio('proyectos',p);save();toast(`Estado: ${eLbl(e)}`);}
 function archivarProy(id){
   const idx=proyectos.findIndex(x=>x.id===id);
   if(idx<0)return;
@@ -1189,7 +1193,7 @@ function cambFechaInicio(id,f){
   marcarCambio('proyectos',p);
   save();toast('Fecha inicio actualizada ✓');
 }
-function cambFecha(id,f){const p=proyectos.find(x=>x.id===id);if(!p)return;p.fechaTermino=f;save();rCmdBriefing();toast(`Fecha actualizada: ${fF(f)}`);}
+function cambFecha(id,f){const p=proyectos.find(x=>x.id===id);if(!p)return;p.fechaTermino=f;marcarCambio('proyectos',p);save();rCmdBriefing();toast(`Fecha actualizada: ${fF(f)}`);}
 function togHP(){const l=document.getElementById('hpL'),i=document.getElementById('hpI');if(!l||!i)return;l.classList.toggle('open');i.style.transform=l.classList.contains('open')?'rotate(90deg)':'';}
 function abrirMTenP(id){abrirMT(id);}
 
@@ -1563,17 +1567,104 @@ function rCmd(){
   cH+=`</div><div style="font-size:10px;color:var(--g5);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;">🟢 Disponible · 🟡 Ocupado · 🔴 Al límite <span style="margin-left:8px;">◷ = eventos con hora · ✓ = acciones</span></div></div></div>`;
   document.getElementById('cCarga').innerHTML=cH;
   // Gantt
-  const hoyD=new Date();hoyD.setHours(0,0,0,0);const tD=cS*7;const finD=new Date(hoyD);finD.setDate(finD.getDate()+tD);const ms2=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const LW=130;
-  let hdrM=`<div style="display:flex;margin-left:${LW}px;margin-bottom:4px;position:relative;height:14px;">`;
-  for(let i=0;i<=tD;i++){const d=new Date(hoyD);d.setDate(d.getDate()+i);if(d.getDate()===1||i===0){const pct=i/tD*100;hdrM+=`<span style="position:absolute;left:${pct}%;font-size:10px;color:var(--g5);font-weight:600;transform:translateX(-50%);white-space:nowrap;">${ms2[d.getMonth()]}</span>`;}}
-  hdrM+=`</div>`;
+  // Rango según filtro: desde el día 1 del mes actual hasta N semanas
+  const hoyD=new Date();hoyD.setHours(0,0,0,0);
+  const rangoIni=new Date(hoyD.getFullYear(),hoyD.getMonth(),1);
+  let rangoFin=new Date(hoyD);rangoFin.setDate(rangoFin.getDate()+cS*7);
+  rangoFin=new Date(rangoFin.getFullYear(),rangoFin.getMonth()+1,0); // hasta fin de ese mes
+  const totalRangoMs=rangoFin-rangoIni;
+  const diasRango=Math.round(totalRangoMs/(1000*60*60*24));
+  const ms2=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const LW=130;
+
+  // Bandas de mes alternadas + líneas divisorias + etiquetas
+  let bandas='';
+  let hdrM='<div style="display:flex;margin-left:'+LW+'px;margin-bottom:0;position:relative;height:26px;">';
+  {
+    let mCursor=new Date(rangoIni);
+    let bandToggle=false;
+    while(mCursor<rangoFin){
+      const mIni=new Date(mCursor.getFullYear(),mCursor.getMonth(),1);
+      const mFin=new Date(mCursor.getFullYear(),mCursor.getMonth()+1,0);
+      const iniPct=Math.max(0,(mIni-rangoIni)/totalRangoMs*100);
+      const finPct=Math.min(100,((mFin-rangoIni)/totalRangoMs*100)+(1/diasRango*100));
+      const wPctM=finPct-iniPct;
+      // Banda de fondo alternada (se inserta en cada fila via CSS no — la ponemos en el header y en contenedor)
+      bandas+='<div style="position:absolute;left:'+iniPct.toFixed(2)+'%;width:'+wPctM.toFixed(2)+'%;top:0;bottom:0;background:'+(bandToggle?'rgba(126,123,70,.05)':'transparent')+';border-left:1.5px solid var(--g3);"></div>';
+      // Etiqueta del mes centrada en su banda
+      hdrM+='<div style="position:absolute;left:'+iniPct.toFixed(2)+'%;width:'+wPctM.toFixed(2)+'%;top:0;text-align:center;">'+
+        '<span style="font-size:11px;color:var(--g7);font-weight:700;letter-spacing:.03em;">'+ms2[mCursor.getMonth()]+(mCursor.getFullYear()!==hoyD.getFullYear()?' '+String(mCursor.getFullYear()).slice(2):'')+'</span>'+
+      '</div>';
+      // Marca del 15
+      const m15=new Date(mCursor.getFullYear(),mCursor.getMonth(),15);
+      if(m15>=rangoIni&&m15<=rangoFin){
+        const pct15=((m15-rangoIni)/totalRangoMs*100).toFixed(2);
+        hdrM+='<div style="position:absolute;left:'+pct15+'%;bottom:0;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);">'+
+          '<span style="font-size:8px;color:var(--g4);">15</span>'+
+        '</div>';
+      }
+      bandToggle=!bandToggle;
+      mCursor=new Date(mCursor.getFullYear(),mCursor.getMonth()+1,1);
+    }
+  }
+  hdrM+='</div>';
+  // Línea de hoy
+  const hoyPct=((hoyD-rangoIni)/totalRangoMs*100).toFixed(2);
+
+  // Estilo de barra según FASE (carga de trabajo)
+  const faseStyle=(estado,bc)=>{
+    switch(estado){
+      case 'diseño':return 'background:'+bc+'33;border:1.5px dashed '+bc+';';
+      case 'preparacion':return 'background:'+bc+'88;';
+      case 'ejecucion':return 'background:'+bc+';';
+      case 'cierre':return 'background:'+bc+'26;border:1.5px solid '+bc+';';
+      default:return 'background:'+bc+';';
+    }
+  };
+  const faseLbl={'diseño':'Diseño','preparacion':'Preparación','ejecucion':'Ejecución','cierre':'Cierre'};
+
   const ganttRow=(p)=>{
-      const finP=p.fechaTermino?new Date(p.fechaTermino+'T00:00:00'):finD;
-      const iniP=p.fechaInicio?new Date(p.fechaInicio+'T00:00:00'):hoyD;const eMs=Math.min(finP-hoyD,finD-hoyD);if(eMs<=0)return'';const w=Math.max(eMs/(finD-hoyD)*100,1.5);const d=dH(p.fechaTermino);const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;let bc='#7E7B46';if(d<0)bc='#C07060';else if(gr>0.85||d<=7)bc='#C4A040';return`<div class="gr"><div class="gl" title="${p.nombre}">${p.nombre}</div><div class="gt"><div class="gb" style="left:0;width:${w}%;background:${bc};" onclick="verP(${p.id})" title="${p.nombre} — ${fF(p.fechaTermino)}">${w>8?fF(p.fechaTermino):''}</div></div></div>`;};
+    if(!p.fechaTermino)return'';
+    const finP=new Date(p.fechaTermino+'T00:00:00');
+    const iniP=p.fechaInicio?new Date(p.fechaInicio+'T00:00:00'):hoyD;
+    if(finP<rangoIni||iniP>rangoFin)return''; // fuera del rango visible
+    const leftMs=Math.max(0,iniP-rangoIni);
+    const leftPct=(leftMs/totalRangoMs*100).toFixed(2);
+    const finVisible=Math.min(finP.getTime(),rangoFin.getTime());
+    const iniVisible=Math.max(iniP.getTime(),rangoIni.getTime());
+    const durMs=Math.max(0,finVisible-iniVisible);
+    const wPct=Math.max(durMs/totalRangoMs*100,1.5).toFixed(2);
+    const d=dH(p.fechaTermino);
+    const gr=p.presupuesto>0?p.gastado/p.presupuesto:0;
+    let bc='#7E7B46';if(d<0)bc='#C07060';else if(gr>0.85||d<=7)bc='#C4A040';
+    const fStyle=faseStyle(p.estado,bc);
+    const fNombre=faseLbl[p.estado]||'';
+    const esSolida=p.estado==='ejecucion'||p.estado==='preparacion';
+    const txtColor=esSolida?'#fff':bc;
+    const faseTxt=parseFloat(wPct)>14?'<span style="font-size:9px;font-weight:700;color:'+txtColor+';letter-spacing:.04em;text-transform:uppercase;padding-left:8px;line-height:20px;white-space:nowrap;overflow:hidden;">'+fNombre+'</span>':'';
+    const tooltip=p.nombre+' · '+fNombre+(p.fechaInicio?' · '+fF(p.fechaInicio)+' → '+fF(p.fechaTermino):' · termina '+fF(p.fechaTermino));
+    return'<div class="gr">'+
+      '<div class="gl" title="'+p.nombre+'">'+p.nombre+'</div>'+
+      '<div class="gt" style="position:relative;">'+
+        bandas+
+        '<div style="position:absolute;left:'+hoyPct+'%;top:-2px;bottom:-2px;width:2px;background:var(--rj);opacity:.5;z-index:1;"></div>'+
+        '<div class="gb" style="position:absolute;left:'+leftPct+'%;width:'+wPct+'%;'+fStyle+'border-radius:4px;cursor:pointer;height:20px;top:50%;transform:translateY(-50%);box-sizing:border-box;display:flex;align-items:center;z-index:2;" onclick="verP('+p.id+')" title="'+tooltip+'">'+faseTxt+'</div>'+
+      '</div>'+
+    '</div>';
+  };
   const proyClientes=pA.filter(p=>p.ubicacion!=='empresa');
   const proyEmpresa=pA.filter(p=>p.ubicacion==='empresa');
   const filas=`${proyClientes.length?`<div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Proyectos</div>${proyClientes.map(ganttRow).join('')}`:''}${proyEmpresa.length?`<div style="font-size:10px;font-weight:700;color:var(--g5);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 6px;">Empresa</div>${proyEmpresa.map(ganttRow).join('')}`:''}`;
-  document.getElementById('cGantt').innerHTML=`<div style="min-width:${LW+200}px;">${hdrM}${filas}<div style="display:flex;gap:14px;margin-top:8px;font-size:10px;color:var(--g5);"><span>🟢 En plazo</span><span>🟡 Atención</span><span>🔴 En riesgo</span></div></div>`;
+  document.getElementById('cGantt').innerHTML=`<div style="min-width:${LW+200}px;">${hdrM}${filas}<div style="display:flex;gap:16px;margin-top:10px;font-size:10px;color:var(--g5);flex-wrap:wrap;align-items:center;">
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:18px;height:10px;background:#7E7B4633;border:1.5px dashed #7E7B46;border-radius:2px;"></span>Diseño</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:18px;height:10px;background:#7E7B4688;border-radius:2px;"></span>Preparación</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:18px;height:10px;background:#7E7B46;border-radius:2px;"></span>Ejecución</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:18px;height:10px;background:#7E7B4626;border:1.5px solid #7E7B46;border-radius:2px;"></span>Cierre</span>
+  <span style="color:var(--g4);">·</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:10px;height:10px;background:#C4A040;border-radius:2px;"></span>Atención</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:10px;height:10px;background:#C07060;border-radius:2px;"></span>Vencido</span>
+  <span style="display:flex;align-items:center;gap:5px;"><span style="display:inline-block;width:2px;height:12px;background:var(--rj);opacity:.65;"></span>Hoy</span>
+</div></div>`;
   // Decisión
   let pljp=null,pljul=null;sems.forEach(s=>{if(!pljp&&tEnS(s,'JP').length<5)pljp=s;if(!pljul&&tEnS(s,'Julián').length<5)pljul=s;});
   const t30=pA.filter(p=>dH(p.fechaTermino)>=0&&dH(p.fechaTermino)<=30);
@@ -1864,7 +1955,7 @@ function gP(){
   marcarCambio('proyectos',p);
   save();
   cM('mP'); // Cerrar modal
-  rProys();
+  rProys();rCmdBriefing();
   nav('pd');verP(p.id);
   toast('Proyecto guardado ✓');
   if(btn)btn.disabled=false;
