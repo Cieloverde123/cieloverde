@@ -287,9 +287,6 @@ body.has-banner{padding-bottom:60px;}
     <button class="ni" onclick="nav('bj')"><span class="ni-ic">▽</span> Bandeja <span class="nb" id="bjBdg" style="display:none">0</span></button>
   </nav>
   <div class="sb-bot">
-    <button onclick="recargarDatos()" style="width:100%;text-align:left;background:none;border:none;border-top:1px solid rgba(255,255,255,.1);padding:10px 16px;font-size:12px;color:rgba(255,255,255,.5);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;">
-      <span style="font-size:14px;">↻</span> Recargar datos desde Sheets
-    </button>
     <div class="sb-user">
       <div class="uav" id="uAv">JP</div>
       <div><div class="unm" id="uNm">Juan Pablo</div><div class="url">Cielo Verde</div></div>
@@ -597,10 +594,23 @@ function eCSS(e){return{ejecucion:'ee',diseño:'ed',presupuesto:'ep',preparacion
 function oLbl(e){return{'visita-pendiente':'Visita pendiente','presupuesto-prep':'Presup. en prep.','presupuesto-enviado':'Presup. enviado','esperando':'Esperando resp.','ganado':'Ganado','perdido':'Perdido'}[e]||e;}
 
 // ══ DATA ══
-let proyectos=[];
-let proyectosArch=[];
+let proyectos=[
+  {id:514,nombre:"Paisajismo Lelio",cliente:"Sebastian Lelio",tipo:"diseño-construccion-riego",ubicacion:"santiago",estado:"diseño",asignado:"JP + Julián",fechaInicio:"2026-07-06",fechaTermino:"2026-08-28",presupuesto:0,gastado:0},
+  {id:515,nombre:"Las Talaveras, Ñuñoa",cliente:"Sin cliente",tipo:"solo-riego",ubicacion:"santiago",estado:"diseño",asignado:"JP",fechaInicio:"2026-06-15",fechaTermino:"2026-07-06",presupuesto:0,gastado:0},
+  {id:516,nombre:"Francisca Ditborn",cliente:"Sin cliente",tipo:"solo-riego",ubicacion:"costa",estado:"diseño",asignado:"JP",fechaInicio:"2026-06-29",fechaTermino:"2026-07-13",presupuesto:0,gastado:0},
+  {id:517,nombre:"Cesfam Algarrobo",cliente:"Fundacion tunquen sustentable",tipo:"diseño-construccion-riego",ubicacion:"costa",estado:"diseño",asignado:"JP + Julián",fechaInicio:"2026-07-15",fechaTermino:"2026-08-31",presupuesto:0,gastado:0},
+  {id:520,nombre:"Angel carcavilla",cliente:"Angel carcavilla",tipo:"diseño-construccion-riego",ubicacion:"costa",estado:"ejecucion",asignado:"JP",fechaInicio:"2025-11-01",fechaTermino:"2026-06-30",presupuesto:0,gastado:0},
+  {id:501,nombre:"Angel carcavilla",cliente:"Sin cliente",tipo:"diseño-construccion",ubicacion:"santiago",estado:"diseño",asignado:"JP",fechaInicio:"2026-06-12",fechaTermino:"2026-06-22",presupuesto:0,gastado:0},
+];
+let proyectosArch=[
+  {id:510,nombre:"Paisajismo Lelio",cliente:"Sebastian Lelio",tipo:"solo-riego",ubicacion:"costa",estado:"diseño",asignado:"JP",fechaInicio:"2026-06-10",fechaTermino:"2026-06-24",presupuesto:0,gastado:0,archivado:true,fechaArchivo:"2026-06-11"},
+  {id:503,nombre:"Paisajismo Lelio",cliente:"Sebastian Lelio",tipo:"asesoria",ubicacion:"santiago",estado:"diseño",asignado:"JP",fechaInicio:"2026-06-17",fechaTermino:"2026-07-12",presupuesto:0,gastado:0,archivado:true,fechaArchivo:"2026-06-11"},
+  {id:502,nombre:"Paisajismo Lelio",cliente:"Sebastian Lelio",tipo:"diseño-construccion-riego",ubicacion:"costa",estado:"diseño",asignado:"JP + Julián",fechaInicio:"2026-07-06",fechaTermino:"2026-09-05",presupuesto:0,gastado:0,archivado:true,fechaArchivo:"2026-06-11"},
+];
 let tareas=[
-  
+  {id:518,titulo:"Preparar presupuesto",responsable:"JP + Julián",fecha:"2026-06-12",prioridad:"media",proyecto:516,objetivo:null,oportunidad:null,nota:"",tipo:"accion",hora:"",estado:"en-curso",done:false},
+  {id:521,titulo:"Terminar limpieza con mane y coordinar camion de escombros",responsable:"Julián",fecha:"2026-06-15",prioridad:"media",proyecto:520,objetivo:null,oportunidad:null,nota:"",tipo:"accion",hora:"",estado:"pendiente",done:false},
+  {id:522,titulo:"julian hablar con su mama para ver como seguimos la mantencion",responsable:"Julián",fecha:"2026-06-12",prioridad:"media",proyecto:520,objetivo:null,oportunidad:null,nota:"",tipo:"evento",hora:"12:30",estado:"pendiente",done:false},
 ];
 let tComp=[],opps=[],oppsG=[],oppsP=[],
 objetivos=[],bandeja=[];
@@ -2204,7 +2214,7 @@ function cFab(){fabO=false;document.getElementById('fM').classList.remove('open'
 document.addEventListener('click',e=>{if(fabO&&!e.target.closest('.fw'))cFab();});
 
 // ══ TOAST ══
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
+function toast(msg){const el=document.getElementById('toastEl');if(!el)return;el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200);}
 
 // ══ RENDER ALL ══
 function abrirDetComp(id){
