@@ -1062,7 +1062,10 @@ function verP(id){const p=proyectos.find(x=>x.id===id);if(!p)return;const pend=t
           <div style="font-size:13px;text-decoration:line-through;color:var(--g5);overflow-wrap:break-word;">${t.titulo}</div>
           <div style="font-size:11px;color:var(--g5);margin-top:2px;">${t.responsable} · ${fF(t.fechaComp)}</div>
         </div>
-        <button onclick="reabrirTarea(${t.id})" style="background:none;border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--g7);cursor:pointer;font-family:inherit;flex-shrink:0;">↩ Reabrir</button>
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+              <button onclick="reabrirTarea(${t.id})" style="background:none;border:1px solid var(--bd);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--g7);cursor:pointer;font-family:inherit;">↩ Reabrir</button>
+              <button onclick="if(confirm('¿Eliminar definitivamente?'))eliminarTareaComp(${t.id})" style="background:none;border:1px solid var(--rj);border-radius:6px;padding:4px 6px;font-size:11px;color:var(--rj);cursor:pointer;font-family:inherit;">✕</button>
+            </div>
       </div>`).join('')}
   </div>`:''}</div><div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Presupuesto</div><div style="font-size:14px;font-weight:600;margin-top:6px;">$${(p.presupuesto/1000000).toFixed(1)}M</div><div style="font-size:11px;color:var(--g5);margin:4px 0 6px;">$${(p.gastado/1000000).toFixed(1)}M gastado (${Math.round(gr*100)}%)</div><div style="height:5px;background:var(--bd);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${Math.min(gr*100,100)}%;background:${fillC};border-radius:3px;"></div></div></div><div class="card" style="padding:14px 16px;margin-bottom:12px;"><div class="decl">Fecha término</div><div style="font-size:14px;font-weight:600;margin-top:6px;">${fF(p.fechaTermino)}</div><div style="font-size:11px;color:${dH(p.fechaTermino)<0?'var(--rj)':'var(--g5)'};margin-top:3px;">${dH(p.fechaTermino)<0?'⚠️ Atrasado':'En '+dH(p.fechaTermino)+' días'}</div></div><div class="card" style="padding:14px 16px;"><div class="decl">Equipo</div><div style="font-size:13px;font-weight:500;margin-top:6px;">${p.asignado}</div></div></div></div>`;nav('pd');setTimeout(()=>{const ctrl=document.getElementById('pdControls');if(ctrl){ctrl.insertAdjacentHTML('afterbegin',eSel+fechaEditHTML);}},20);}
 function cambE(id,e){const p=proyectos.find(x=>x.id===id);if(!p)return;p.estado=e;save();toast(`Estado: ${eLbl(e)}`);}
@@ -1094,17 +1097,37 @@ function restaurarProy(id){
 function confirmarEliminarProy(id){
   const p=proyectos.find(x=>x.id===id)||proyectosArch.find(x=>x.id===id);
   const nom=p?p.nombre:'este proyecto';
-  // Mostrar confirmación inline en vez de confirm()
+  const esArchivado=proyectosArch.some(x=>x.id===id);
+  // Si es archivado — confirmar con toast inline en la lista
+  if(esArchivado){
+    const card=document.getElementById('archCard'+id);
+    const msgId='archMsg'+id;
+    if(document.getElementById(msgId))return; // ya mostrado
+    const msg=document.createElement('div');
+    msg.id=msgId;
+    msg.style.cssText='background:#FEF0EE;border:1px solid var(--rj);border-radius:8px;padding:12px;margin-top:8px;text-align:center;';
+    msg.innerHTML='<div style="font-size:13px;font-weight:600;color:var(--rj);margin-bottom:8px;">¿Eliminar definitivamente?</div>'+
+      '<div style="font-size:11px;color:var(--g5);margin-bottom:10px;">Esta acción no se puede deshacer.</div>'+
+      '<div style="display:flex;gap:8px;justify-content:center;">'+
+      '<button onclick="eliminarProy('+id+')" class="btn btn-sm" style="background:var(--rj);color:#fff;border:none;padding:6px 14px;">Sí, eliminar</button>'+
+      '<button onclick="var m=document.getElementById(\''+msgId+'\');if(m)m.remove()" class="btn btn-g btn-sm">Cancelar</button>'+
+      '</div>';
+    // Insertar después del botón eliminar en la tarjeta
+    const btn=document.querySelector('[onclick*="confirmarEliminarProy('+id+')"]');
+    if(btn&&btn.parentNode)btn.parentNode.insertAdjacentElement('afterend',msg);
+    else rProys(); // fallback
+    return;
+  }
+  // Si es proyecto activo — mostrar en detalle
   const det=document.getElementById('pdC');
   if(!det)return;
-  const confHtml=`<div style="background:#FEF0EE;border:1px solid var(--rj);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">
-    <div style="font-size:14px;font-weight:600;color:var(--rj);margin-bottom:8px;">¿Eliminar "${nom}"?</div>
-    <div style="font-size:12px;color:var(--g5);margin-bottom:12px;">Las tareas vinculadas quedarán sin proyecto. Esta acción no se puede deshacer.</div>
-    <div style="display:flex;gap:8px;justify-content:center;">
-      <button onclick="eliminarProy(${id})" class="btn btn-sm" style="background:var(--rj);color:#fff;border:none;">Sí, eliminar</button>
-      <button onclick="verP(${id})" class="btn btn-g btn-sm">Cancelar</button>
-    </div>
-  </div>`;
+  const confHtml='<div style="background:#FEF0EE;border:1px solid var(--rj);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">'+
+    '<div style="font-size:14px;font-weight:600;color:var(--rj);margin-bottom:8px;">¿Eliminar "'+nom+'"?</div>'+
+    '<div style="font-size:12px;color:var(--g5);margin-bottom:12px;">Las tareas vinculadas quedarán sin proyecto.</div>'+
+    '<div style="display:flex;gap:8px;justify-content:center;">'+
+    '<button onclick="eliminarProy('+id+')" class="btn btn-sm" style="background:var(--rj);color:#fff;border:none;">Sí, eliminar</button>'+
+    '<button onclick="verP('+id+')" class="btn btn-g btn-sm">Cancelar</button>'+
+    '</div></div>';
   det.insertAdjacentHTML('afterbegin',confHtml);
 }
 
@@ -2029,8 +2052,27 @@ function abrirDetComp(id){
     if(lbl)lbl.textContent='✓ Completada el '+fF(t.fechaComp);
     const btn=document.getElementById('dfCompReabrir');
     if(btn)btn.onclick=()=>{reabrirTarea(tid);cDet();};
+    const btnElim=document.getElementById('dfCompEliminar');
+    if(btnElim)btnElim.onclick=()=>{
+      if(confirm('¿Eliminar esta tarea definitivamente?'))eliminarTareaComp(tid);
+    };
   }
   document.getElementById('dT').classList.add('open');
+}
+
+function eliminarTareaComp(id){
+  const i=tComp.findIndex(t=>t.id===id);
+  if(i<0)return;
+  marcarEliminado('tareasComp',id);
+  tComp.splice(i,1);
+  save();
+  cDet();
+  rTodo();
+  rCmdBriefing();
+  // Refrescar proyecto si está abierto
+  const pdC=document.getElementById('pdC');
+  if(pdC&&pdC.getAttribute('data-pid'))verP(parseInt(pdC.getAttribute('data-pid')));
+  toast('Tarea eliminada');
 }
 
 function reabrirTarea(id){
