@@ -562,7 +562,7 @@ body.has-banner{padding-bottom:60px;}
   </div>
   <div class="mf"><button class="btn btn-g" onclick="cM('mObj')">Cancelar</button><button class="btn btn-p" onclick="gObj()"> Crear</button></div>
 </div></div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toastEl"></div>
 <script>
 // ══ ESTADO ══
 let CU=null,pS='media',pDS='media',dId=null,fTF='todos',fTP=null,fPF='todos',fOF='todos',cS=8,fabO=false,oEI=null,objEId=null,IDC=500;
@@ -986,17 +986,20 @@ function cDet(){
   if(dfN)dfN.style.display='';
   if(dfC)dfC.style.display='none';
 }
+function cancelarEliminarTarea(){
+  const df=document.getElementById('dfNormal');
+  if(df&&window._dfHtml)df.innerHTML=window._dfHtml;
+}
 function eliminarTareaDetalle(){
   if(!dId)return;
-  // Confirmación inline — cambiar botones del detalle
-  const df=document.querySelector('.df');
+  const df=document.getElementById('dfNormal');
   if(!df)return;
-  df.innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;">
-      <span style="font-size:13px;color:var(--g7);flex:1;">¿Eliminar esta tarea?</span>
-      <button class="btn btn-sm" style="background:var(--rj);color:#fff;border:none;" onclick="confirmarEliminarTarea()">Sí, eliminar</button>
-      <button class="btn btn-g btn-sm" onclick="abrirDet(dId)">Cancelar</button>
-    </div>`;
+  window._dfHtml=df.innerHTML;
+  df.innerHTML='<div style="display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;">'+
+    '<span style="font-size:13px;color:var(--g7);flex:1;">¿Eliminar esta tarea?</span>'+
+    '<button class="btn btn-sm" style="background:var(--rj);color:#fff;border:none;" onclick="confirmarEliminarTarea()">Sí, eliminar</button>'+
+    '<button class="btn btn-g btn-sm" onclick="cancelarEliminarTarea()">Cancelar</button>'+
+    '</div>';
 }
 
 function confirmarEliminarTarea(){
@@ -1015,7 +1018,31 @@ function confirmarEliminarTarea(){
   toast('Tarea eliminada');
 }
 
-function gDet(){const t=tareas.find(x=>x.id===dId);if(!t)return;t.titulo=document.getElementById('dTit').textContent.trim();t.responsable=document.getElementById('dRes').value;t.fecha=document.getElementById('dFec').value;t.nota=document.getElementById('dNota').value;t.prioridad=pDS;const dPvRaw=document.getElementById('dPr').value;t.proyecto=dPvRaw==='empresa_general'?'empresa_general':(dPvRaw?parseInt(dPvRaw):null);save();cDet();rTodo();rCmdBriefing();toast('Tarea actualizada ✓');}
+function gDet(){
+  const t=tareas.find(x=>x.id===dId);if(!t)return;
+  t.titulo=document.getElementById('dTit').textContent.trim();
+  t.responsable=document.getElementById('dRes').value;
+  t.fecha=document.getElementById('dFec').value;
+  t.nota=document.getElementById('dNota')?.value||'';
+  t.prioridad=pDS;
+  const dPvRaw=document.getElementById('dPr').value;
+  t.proyecto=dPvRaw==='empresa_general'?'empresa_general':(dPvRaw?parseInt(dPvRaw):null);
+  // Tipo y hora
+  t.tipo=tipoDSel||t.tipo;
+  const dh=document.getElementById('dHora');
+  if(dh)t.hora=t.tipo==='evento'?dh.value:'';
+  // Estado (solo para acciones)
+  const de=document.getElementById('dEstado');
+  if(de&&t.tipo==='accion')t.estado=de.value;
+  // Preservar campos que no se editan en el modal
+  // objetivo y oportunidad se mantienen como estaban
+  // (t.objetivo y t.oportunidad no se tocan — ya están en el objeto)
+  marcarCambio('tareas',t);
+  save();cDet();rTodo();rCmdBriefing();
+  const pdCgd=document.getElementById('pdC');
+  if(pdCgd&&pdCgd.getAttribute('data-pid'))verP(parseInt(pdCgd.getAttribute('data-pid')));
+  toast('Tarea actualizada ✓');
+}
 function compDet(){const id=dId;cDet();comp(id);}
 function sPD(p){pDS=p;document.querySelectorAll('#dT .po').forEach(b=>b.classList.toggle('sel',b.classList.contains(p)));}
 
@@ -1092,7 +1119,7 @@ function archivarProy(id){
   p.fechaArchivo=hoy();
   proyectosArch.push(p);
   marcarCambio('proyectosArch',p);marcarEliminado('proyectos',p.id);
-  save();nav('proy');
+  save();rProys();rCmdBriefing();nav('proy');
   toast('Proyecto archivado ✓');
 }
 
@@ -1269,9 +1296,9 @@ function guardarTareaOpp(oppId){
   const resp=document.getElementById('oppInpResp'+oppId);
   const fec=document.getElementById('oppInpFec'+oppId);
   const t={id:uid(),titulo,responsable:resp?resp.value:(CU||'JP'),fecha:fec?fec.value:hP(3),prioridad:'media',proyecto:null,objetivo:null,oportunidad:oppId,nota:'',done:false};
-  tareas.push(t);save();
+  tareas.push(t);marcarCambio('tareas',t);save();
   document.getElementById('oppInp'+oppId).style.display='none';
-  rOpps();rTodo();rCmd();
+  rOpps();rTodo();rCmdBriefing();
   toast('Tarea agregada ✓');
 }
 
@@ -1687,7 +1714,7 @@ function editViz(){const el=document.getElementById('vizT');const v=prompt('Edit
 // ══ BANDEJA ══
 function rBj(){const b=document.getElementById('bjBdg');b.textContent=bandeja.length;b.style.display=bandeja.length>0?'inline':'none';document.getElementById('bjE').style.display=bandeja.length===0?'block':'none';document.getElementById('bjL').innerHTML=bandeja.map(x=>`<div class="bji"><div class="bjt">${x.texto}</div><div class="bjd">${fF(x.fecha)}</div><button onclick="cvBj(${x.id})" class="btn btn-g btn-sm" style="font-size:11px;">✓ Convertir</button><button onclick="delBj(${x.id})" style="background:none;border:none;cursor:pointer;color:var(--g5);font-size:14px;margin-left:4px;">✕</button></div>`).join('');}
 function cvBj(id){const x=bandeja.find(b=>b.id===id);if(!x)return;document.getElementById('tTit').value=x.texto;bandeja=bandeja.filter(b=>b.id!==id);save();rBj();abrirM('mT');}
-function delBj(id){bandeja=bandeja.filter(b=>b.id!==id);save();rBj();}
+function delBj(id){marcarEliminado('bandeja',id);bandeja=bandeja.filter(b=>b.id!==id);save();rBj();}
 
 // ══ MODALES SAVE ══
 function abrirMT(pId=null,oId=null){
@@ -1847,7 +1874,7 @@ function abrirMO(){
   const campos=['oNom','oCli','oMon','oAcc','oNot'];
   campos.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const oEst=document.getElementById('oEst');if(oEst)oEst.value='visita-pendiente';
-  const oFa=document.getElementById('oFa');if(oFa)oFa.value='';
+  const oFa=document.getElementById('oFAc');if(oFa)oFa.value='';
   document.getElementById('mOT').textContent='Nueva oportunidad';
   oId=null;
   abrirM('mO');
@@ -1864,7 +1891,9 @@ function gO(){
       const yaExiste=proyectos.some(p=>p.nombre===nom);
       if(yaExiste){toast('Ya existe un proyecto con ese nombre');return;}
       const nP={id:uid(),nombre:nom,cliente:data.cliente||'Sin cliente',tipo:'diseño-construccion',ubicacion:'santiago',estado:'diseño',asignado:'JP',fechaTermino:hP(90),presupuesto:data.monto||0,gastado:0};
-      proyectos.push(nP);save();rProys();rCmdBriefing();
+      proyectos.push(nP);
+      marcarCambio('proyectos',nP);
+      save();rProys();rCmdBriefing();
       toast('✓ Proyecto "'+nom+'" creado — revísalo en Proyectos');
     },300);
   } else {
@@ -1893,7 +1922,7 @@ function editObj(id){
   marcarCambio('objetivos',o);
   save();rEst();toast('Objetivo actualizado');
 }
-function delObj(id){if(!confirm('¿Eliminar este objetivo?'))return;objetivos=objetivos.filter(x=>x.id!==id);tareas.filter(t=>t.objetivo===id).forEach(t=>t.objetivo=null);save();rEst();toast('Objetivo eliminado');}
+function delObj(id){if(!confirm('¿Eliminar este objetivo?'))return;objetivos=objetivos.filter(x=>x.id!==id);tareas.filter(t=>t.objetivo===id).forEach(t=>t.objetivo=null);marcarEliminado('objetivos',id);save();rEst();toast('Objetivo eliminado');}
 // ── TIPO SELECTOR ──────────────────────────
 let tipoSel='accion';
 let tipoDSel='accion';
@@ -2076,7 +2105,8 @@ function abrirDetComp(id){
 }
 
 function eliminarTareaComp(id){
-  const i=tComp.findIndex(t=>t.id===id);
+  const idN=typeof id==='number'?id:parseInt(id);
+  const i=tComp.findIndex(t=>t.id===idN||t.id==id);
   if(i<0)return;
   marcarEliminado('tareasComp',id);
   tComp.splice(i,1);
@@ -2091,8 +2121,9 @@ function eliminarTareaComp(id){
 }
 
 function reabrirTarea(id){
-  const i=tComp.findIndex(t=>t.id===id);
-  if(i<0)return;
+  const idN=typeof id==='number'?id:parseInt(id);
+  const i=tComp.findIndex(t=>t.id===idN||t.id==id);
+  if(i<0){toast('No se encontró la tarea');return;}
   const t=tComp.splice(i,1)[0];
   t.done=false;
   delete t.fechaComp;
@@ -2113,7 +2144,10 @@ function deshacerComp(id){
   const t=tComp.splice(i,1)[0];
   delete t.done;delete t.fechaComp;
   t.done=false;
-  tareas.push(t);save();rTodo();rCmdBriefing();
+  tareas.push(t);
+  marcarCambio('tareas',t);
+  marcarEliminado('tareasComp',t.id);
+  save();rTodo();rCmdBriefing();
   toast('Tarea restaurada ✓');
 }
 function rAll(){rTodo();rProys();rOpps();rEst();rBj();}
