@@ -597,16 +597,13 @@ function eCSS(e){return{ejecucion:'ee',diseño:'ed',presupuesto:'ep',preparacion
 function oLbl(e){return{'visita-pendiente':'Visita pendiente','presupuesto-prep':'Presup. en prep.','presupuesto-enviado':'Presup. enviado','esperando':'Esperando resp.','ganado':'Ganado','perdido':'Perdido'}[e]||e;}
 
 // ══ DATA ══
-let proyectos=[
-  {id:1,nombre:"[EJEMPLO] Jardín Familia González",cliente:"Familia González",tipo:"diseño-construccion",ubicacion:"santiago",estado:"ejecucion",asignado:"JP + Julián",fechaInicio:"",fechaTermino:hP(20),presupuesto:8000000,gastado:3000000},
-];
+let proyectos=[];
 let proyectosArch=[];
 let tareas=[
-  {id:2,titulo:"[EJEMPLO ACCIÓN] Preparar materiales para proyecto",responsable:"JP",fecha:hP(3),prioridad:"alta",proyecto:1,objetivo:null,oportunidad:null,nota:"Esto es una acción — fecha compromiso sin hora fija",done:false,tipo:"accion",hora:"",estado:"pendiente"},
-  {id:3,titulo:"[EJEMPLO EVENTO] Reunión con cliente",responsable:"JP",fecha:hP(2),prioridad:"alta",proyecto:1,objetivo:null,oportunidad:null,nota:"Esto es un evento — ocurre a una hora específica",done:false,tipo:"evento",hora:"15:00",estado:"pendiente"},
+  
 ];
-let tComp=[],opps=[{id:4,nombre:"[EJEMPLO] Jardín Familia Pérez",cliente:"Familia Pérez",estado:"presupuesto-enviado",monto:6000000,accion:"Llamar el viernes para seguimiento",fechaAccion:hP(4),nota:"Contactaron por Instagram"}],oppsG=[],oppsP=[],
-objetivos=[{id:5,titulo:"[EJEMPLO] Consolidar presencia en la Costa",descripcion:"Zapallar y Algarrobo como mercado prioritario — reemplaza con tu objetivo real"}],bandeja=[];
+let tComp=[],opps=[],oppsG=[],oppsP=[],
+objetivos=[],bandeja=[];
 
 // ══ STORAGE ══
 // ══ GOOGLE SHEETS SYNC ══
