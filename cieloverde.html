@@ -287,6 +287,9 @@ body.has-banner{padding-bottom:60px;}
     <button class="ni" onclick="nav('bj')"><span class="ni-ic">▽</span> Bandeja <span class="nb" id="bjBdg" style="display:none">0</span></button>
   </nav>
   <div class="sb-bot">
+    <button onclick="recargarDatos()" style="width:100%;text-align:left;background:none;border:none;border-top:1px solid rgba(255,255,255,.1);padding:10px 16px;font-size:12px;color:rgba(255,255,255,.5);cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:14px;">↻</span> Recargar datos desde Sheets
+    </button>
     <div class="sb-user">
       <div class="uav" id="uAv">JP</div>
       <div><div class="unm" id="uNm">Juan Pablo</div><div class="url">Cielo Verde</div></div>
@@ -813,6 +816,13 @@ function load(){try{const t=localStorage.getItem('cv10_t');if(t)tareas=JSON.pars
 // ══ LOGIN ══
 function login(u){CU=u;localStorage.setItem('cv10_u',u);document.getElementById('LS').style.display='none';const jp=u==='JP';document.getElementById('uAv').textContent=jp?'JP':'JL';document.getElementById('uAv').className='uav'+(jp?'':' jul');document.getElementById('uNm').textContent=jp?'Juan Pablo':'Julián';fTF=jp?'yo':'jul';nav('cmd');setFecha();toast(`Bienvenido, ${jp?'Juan Pablo':'Julián'} 🌿`);}
 function logout(){localStorage.removeItem('cv10_u');CU=null;document.getElementById('LS').style.display='flex';}
+function recargarDatos(){
+  if(!confirm('¿Recargar todos los datos desde Sheets?'))return;
+  const u=localStorage.getItem('cv10_u');
+  Object.keys(localStorage).filter(k=>k.startsWith('cv10_')).forEach(k=>localStorage.removeItem(k));
+  if(u)localStorage.setItem('cv10_u',u);
+  location.reload();
+}
 
 // ══ NAV ══
 const TITLES={cmd:'Inicio',todo:'To-Do',proy:'Proyectos',pd:'Proyecto',opp:'Oportunidades',est:'Estrategia',bj:'Bandeja'};
