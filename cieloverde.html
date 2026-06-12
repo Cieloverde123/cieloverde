@@ -1876,14 +1876,39 @@ function abrirMO(){
   const oEst=document.getElementById('oEst');if(oEst)oEst.value='visita-pendiente';
   const oFa=document.getElementById('oFAc');if(oFa)oFa.value='';
   document.getElementById('mOT').textContent='Nueva oportunidad';
-  oId=null;
+  oEI=null;
   abrirM('mO');
 }
 function editO(id){const o=[...opps,...oppsG,...oppsP].find(x=>x.id===id);if(!o)return;oEI=id;document.getElementById('mOT').textContent='Editar oportunidad';document.getElementById('oNom').value=o.nombre;document.getElementById('oCli').value=o.cliente;document.getElementById('oEst').value=o.estado;document.getElementById('oMonto').value=o.monto||'';document.getElementById('oAcc').value=o.accion||'';document.getElementById('oFAc').value=o.fechaAccion||'';document.getElementById('oNota').value=o.nota||'';abrirM('mO');}
 function gO(){
   const btnO=document.querySelector('#mO .btn-p');
   if(btnO&&btnO.disabled)return;
-  if(btnO)btnO.disabled=true;const nom=document.getElementById('oNom').value.trim();if(!nom){toast('Escribe un nombre');return;}const data={nombre:nom,cliente:document.getElementById('oCli').value.trim(),estado:document.getElementById('oEst').value,monto:parseFloat(document.getElementById('oMonto').value)||0,accion:document.getElementById('oAcc').value.trim(),fechaAccion:document.getElementById('oFAc').value,nota:document.getElementById('oNota').value.trim()};if(oEI){let arr=opps;let i=arr.findIndex(x=>x.id===oEI);if(i<0){arr=oppsG;i=arr.findIndex(x=>x.id===oEI);}if(i<0){arr=oppsP;i=arr.findIndex(x=>x.id===oEI);}if(i>=0){const upd={...arr[i],...data};arr.splice(i,1);if(data.estado==='ganado')oppsG.push(upd);else if(data.estado==='perdido')oppsP.push(upd);else opps.push(upd);}}else{const n={id:uid(),...data};if(data.estado==='ganado')oppsG.push(n);else if(data.estado==='perdido')oppsP.push(n);else opps.push(n);}save();cM('mO');rOpps();rCmdBriefing();
+  if(btnO)btnO.disabled=true;const nom=document.getElementById('oNom').value.trim();if(!nom){toast('Escribe un nombre');return;}const data={nombre:nom,cliente:document.getElementById('oCli').value.trim(),estado:document.getElementById('oEst').value,monto:parseFloat(document.getElementById('oMonto').value)||0,accion:document.getElementById('oAcc').value.trim(),fechaAccion:document.getElementById('oFAc').value,nota:document.getElementById('oNota').value.trim()};if(oEI){let arr=opps;let i=arr.findIndex(x=>x.id===oEI);if(i<0){arr=oppsG;i=arr.findIndex(x=>x.id===oEI);}if(i<0){arr=oppsP;i=arr.findIndex(x=>x.id===oEI);}if(i>=0){const upd={...arr[i],...data};arr.splice(i,1);if(data.estado==='ganado')oppsG.push(upd);else if(data.estado==='perdido')oppsP.push(upd);else opps.push(upd);}}else{const n={id:uid(),...data};if(data.estado==='ganado')oppsG.push(n);else if(data.estado==='perdido')oppsP.push(n);else opps.push(n);}save();
+  // Si hay próxima acción con fecha → crear tarea en To-Do
+  if(data.accion&&data.accion.trim()&&data.fechaAccion){
+    const oppId=oEI||opps[opps.length-1]?.id||oppsG[oppsG.length-1]?.id||oppsP[oppsP.length-1]?.id;
+    const tarea={
+      id:uid(),
+      titulo:data.accion.trim(),
+      responsable:CU||'JP',
+      fecha:data.fechaAccion,
+      prioridad:'media',
+      tipo:'accion',
+      hora:'',
+      estado:'pendiente',
+      proyecto:null,
+      objetivo:null,
+      oportunidad:oppId||null,
+      nota:'Próxima acción de oportunidad: '+(data.nombre||''),
+      done:false
+    };
+    tareas.push(tarea);
+    marcarCambio('tareas',tarea);
+    toast('✓ Oportunidad guardada + tarea creada en To-Do');
+  } else {
+    toast('Oportunidad guardada ✓');
+  }
+  cM('mO');rOpps();rTodo();rCmdBriefing();
   // Si se marcó como ganada, ofrecer crear proyecto
   if(data.estado==='ganado'){
     setTimeout(()=>{
