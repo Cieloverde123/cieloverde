@@ -2361,14 +2361,28 @@ setInterval(()=>{
   const u = localStorage.getItem('cv10_u');
   if(u){
     login(u);
-    // Sincronizar con Sheets — primero subir datos locales, luego comparar
     if(SHEETS_URL){
-      // Siempre cargar desde Sheets al arrancar para tener datos actualizados
+      // Mostrar cargando si no hay datos locales
+      const sinDatos = proyectos.length === 0 && tareas.length === 0;
+      if(sinDatos){
+        // Mostrar overlay de carga
+        const overlay = document.createElement('div');
+        overlay.id = 'loadingOverlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;';
+        overlay.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'%3E%3C/svg%3E" style="width:60px;"><div style=\'font-size:16px;color:var(--ol);font-weight:600;font-family:inherit;\'>Cargando datos...</div><div style=\'font-size:12px;color:var(--g5);font-family:inherit;\'>Conectando con Sheets</div>';
+        document.body.appendChild(overlay);
+      }
       actualizarIndicadorSync('syncing');
       const ok = await cargarDesdeSheets();
       if(ok){ rAll(); }
-      // Si hay cambios locales pendientes, enviarlos después
+      // Quitar overlay
+      const ov = document.getElementById('loadingOverlay');
+      if(ov) ov.remove();
+      // Sincronizar cambios locales pendientes
       await syncSheets();
+    } else {
+      // Sin Sheets — mostrar lo que hay en localStorage
+      rAll();
     }
   }
 });
