@@ -302,7 +302,7 @@ body.has-banner{padding-bottom:60px;}
       <div><div class="tt" id="topT">Dashboard</div><div class="td" id="topD"></div></div>
     </div>
     <div class="tr" style="align-items:center;gap:8px;">
-      <div id="syncIndicator" title="Solo local" style="width:8px;height:8px;border-radius:50%;background:var(--g3);flex-shrink:0;cursor:default;transition:background .5s;"></div>
+      <div id="syncIndicator" title="Conectando..." style="width:8px;height:8px;border-radius:50%;background:var(--g3);flex-shrink:0;cursor:default;transition:background .5s;"></div>
       <button class="btn btn-g btn-sm" onclick="compartir()">Compartir</button>
       <button class="btn btn-p btn-sm" onclick="abrirMT()">+ Nueva tarea</button>
     </div>
@@ -607,7 +607,7 @@ objetivos=[{id:5,titulo:"[EJEMPLO] Consolidar presencia en la Costa",descripcion
 
 // ══ STORAGE ══
 // ══ GOOGLE SHEETS SYNC ══
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxEwRCheBO9KTQy2A4KnjsunsN1jbF8CBdJieNfLZS8g63O36QVEn2w-8y7k-g9CKMHyw/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwoA5F7WbDXnIxq3v0TEky9Wq_9b5QtY-L0ENWGv85r8GOJUtNuXwzKoRg0H79ooI8YDQ/exec';
 
 let syncStatus = 'local'; // 'local' | 'syncing' | 'synced' | 'error'
 let syncTimeout = null;
@@ -617,10 +617,10 @@ function actualizarIndicadorSync(status){
   const el = document.getElementById('syncIndicator');
   if(!el) return;
   const estados = {
-    local:   { color:'var(--g3)',  texto:'Solo local' },
-    syncing: { color:'#C4A040',    texto:'Guardando...' },
-    synced:  { color:'#5A9050',    texto:'Sincronizado' },
-    error:   { color:'var(--rj)', texto:'Sin conexión' }
+    local:   { color:'var(--g3)',  texto:'Solo local — sin sincronizar' },
+    syncing: { color:'#C4A040',    texto:'Sincronizando...' },
+    synced:  { color:'#5A9050',    texto:'Sincronizado con Sheets' },
+    error:   { color:'var(--rj)', texto:'Error: verificar Apps Script' }
   };
   const e = estados[status] || estados.local;
   el.style.background = e.color;
@@ -669,10 +669,15 @@ async function syncSheets(){
       vision: document.getElementById('vizT')?.textContent || ''
     };
     
+    const ctrl2 = new AbortController();
+    const timer2 = setTimeout(()=>ctrl2.abort(), 10000);
     const resp = await fetch(SHEETS_URL, {
       method:'POST',
-      body: JSON.stringify(payload)
+      mode:'cors',
+      body: JSON.stringify(payload),
+      signal: ctrl2.signal
     });
+    clearTimeout(timer2);
     const data = await resp.json();
     
     if(data.ok){
@@ -698,7 +703,13 @@ async function cargarDesdeSheets(){
   if(!SHEETS_URL) return false;
   try {
     actualizarIndicadorSync('syncing');
-    const resp = await fetch(SHEETS_URL + '?t=' + Date.now());
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(), 8000);
+    const resp = await fetch(SHEETS_URL + '?t=' + Date.now(), {
+      signal: controller.signal,
+      mode: 'cors'
+    });
+    clearTimeout(timer);
     const data = await resp.json();
     if(!data.ok || !data.datos) { actualizarIndicadorSync('error'); return false; }
     const d = data.datos;
