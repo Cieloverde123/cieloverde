@@ -2301,6 +2301,22 @@ if('serviceWorker' in navigator){
 }
 
 document.addEventListener('DOMContentLoaded',async ()=>{
+  // ?reset en URL → limpiar timestamp para forzar recarga desde Sheets
+  if(location.search.includes('reset')){
+    localStorage.removeItem('cv10_ts');
+    localStorage.removeItem('cv10_p');
+    localStorage.removeItem('cv10_t');
+    localStorage.removeItem('cv10_tc');
+    localStorage.removeItem('cv10_o');
+    localStorage.removeItem('cv10_og');
+    localStorage.removeItem('cv10_op');
+    localStorage.removeItem('cv10_obj');
+    localStorage.removeItem('cv10_bj');
+    localStorage.removeItem('cv10_pa');
+    // Quitar el parámetro de la URL sin recargar
+    history.replaceState({},'',location.pathname);
+    toast('Datos limpiados — cargando desde Sheets...');
+  }
   // Detectar Safari privado (localStorage bloqueado)
   try{localStorage.setItem('_cv_test','1');localStorage.removeItem('_cv_test');}
   catch(e){
