@@ -494,8 +494,22 @@ body.has-banner{padding-bottom:60px;}
     <div id="dAlt"></div>
   </div>
   <div class="def">
-    <button class="btn btn-g btn-sm" style="color:var(--ol);border-color:var(--ol);" onclick="compDet()"> Marcar hecha</button>
-    <div style="display:flex;gap:7px;"><button class="btn btn-g btn-sm" onclick="cDet()">Cancelar</button><button class="btn btn-p btn-sm" onclick="gDet()"> Guardar</button></div>
+    <!-- Footer normal -->
+    <div id="dfNormal" style="display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-g btn-sm" style="color:var(--ol);border-color:var(--ol);" onclick="compDet()">✓ Marcar hecha</button>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-g btn-sm" onclick="cDet()">Cancelar</button>
+        <button class="btn btn-p btn-sm" onclick="gDet()">Guardar</button>
+        <button class="btn btn-g btn-sm" onclick="eliminarTareaDetalle()" style="color:var(--rj);border-color:var(--rj);">✕</button>
+      </div>
+    </div>
+    <!-- Footer completada -->
+    <div id="dfComp" style="display:none;align-items:center;gap:8px;width:100%;flex-wrap:wrap;">
+      <span id="dfCompFecha" style="font-size:12px;color:var(--g5);flex:1;"></span>
+      <button class="btn btn-p btn-sm" id="dfCompReabrir">↩ Reabrir</button>
+      <button class="btn btn-g btn-sm" id="dfCompEliminar" style="color:var(--rj);border-color:var(--rj);">✕ Eliminar</button>
+      <button class="btn btn-g btn-sm" onclick="cDet()">Cerrar</button>
+    </div>
   </div>
 </div></div>
 <!-- MODAL PROYECTO -->
@@ -844,8 +858,9 @@ function rTodo(){let l=tareas.filter(t=>!t.done);const yo=CU==='JP'?'JP':'Juliá
         <span>✓ ${fF(t.fechaComp)}</span>
       </div>
     </div>
-    <div class="tac" style="opacity:1;">
+    <div class="tac" style="opacity:1;gap:4px;">
       <button class="tacb" onclick="event.stopPropagation();reabrirTarea(${t.id})" title="Reabrir" style="font-size:11px;padding:3px 7px;">↩</button>
+      <button class="tacb" onclick="event.stopPropagation();if(confirm('¿Eliminar esta tarea?'))eliminarTareaComp(${t.id})" title="Eliminar" style="font-size:11px;padding:3px 6px;color:var(--rj);">✕</button>
     </div>
   </div>`).join('');
   // Vencidas section
