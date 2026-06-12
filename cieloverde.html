@@ -655,7 +655,11 @@ async function syncSheets(){
   
   // Verificar si hay cambios pendientes
   const hayCambios = Object.values(_pendingChanges).some(arr=>arr.length>0);
-  if(!hayCambios) return;
+  if(!hayCambios){
+    // Sin cambios locales — igual verificar si Sheets tiene algo nuevo
+    actualizarIndicadorSync('synced');
+    return;
+  }
   
   actualizarIndicadorSync('syncing');
   try {
@@ -2306,6 +2310,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   },1000);
   load(); // Cargar localStorage primero (rápido)
   setInterval(()=>{save();},30000);
+// Verificar Sheets cada 2 minutos
+setInterval(async ()=>{
+  if(SHEETS_URL && CU){
+    await cargarDesdeSheets();
+  }
+},120000);
 // Detectar cambio de día y actualizar vistas
 let _diaActual=new Date().toDateString();
 setInterval(()=>{
@@ -2321,11 +2331,12 @@ setInterval(()=>{
     login(u);
     // Sincronizar con Sheets — primero subir datos locales, luego comparar
     if(SHEETS_URL){
-      // Primero hacer sync de datos locales hacia Sheets
-      await syncSheets();
-      // Luego intentar cargar si Sheets tiene más datos
+      // Siempre cargar desde Sheets al arrancar para tener datos actualizados
+      actualizarIndicadorSync('syncing');
       const ok = await cargarDesdeSheets();
       if(ok){ rAll(); }
+      // Si hay cambios locales pendientes, enviarlos después
+      await syncSheets();
     }
   }
 });
