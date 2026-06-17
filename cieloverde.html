@@ -535,7 +535,7 @@ body.has-banner{padding-bottom:60px;}
 <option value="ejecucion">Ejecución</option>
 <option value="cierre">Cierre</option></select></div></div>
     <div class="fr2"><div class="fg"><label class="fl">Asignado</label><select class="fsel" id="pAsig"><option value="JP">Juan Pablo</option><option value="Julián">Julián</option><option value="JP + Julián" selected>JP + Julián</option></select></div><div class="fg"><label class="fl">Fecha inicio</label><input class="fi2" type="date" id="pFi" title="Cuándo empieza realmente el trabajo"></div></div>
-    <div class="fr2"><div class="fg"><label class="fl">Fecha término</label><input class="fi2" type="date" id="pFec"></div></div>
+    <div class="fr2"><div class="fg"><label class="fl">Fecha término <span style="color:var(--rj);">*</span></label><input class="fi2" type="date" id="pFec" required></div></div>
     <div style="grid-column:1/-1;background:var(--g1);border-radius:10px;padding:12px 14px;">
       <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g5);margin-bottom:10px;">Inicio de fases (opcional)</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
@@ -2065,6 +2065,8 @@ function gP(){
   
   const nom=document.getElementById('pNom').value.trim();
   if(!nom){toast('Escribe un nombre');if(btn)btn.disabled=false;return;}
+  const fechaT=document.getElementById('pFec')?.value||'';
+  if(!fechaT){toast('Agrega una fecha de término');if(btn)btn.disabled=false;return;}
   const p={
     id:uid(),
     nombre:nom,
@@ -2073,8 +2075,8 @@ function gP(){
     ubicacion:document.getElementById('pUbi')?.value||'santiago',
     estado:document.getElementById('pEst').value,
     asignado:document.getElementById('pAsig')?.value||'JP',
-    fechaInicio:document.getElementById('pFi')?.value||'',
-    fechaTermino:document.getElementById('pFec')?.value||'',
+    fechaInicio:document.getElementById('pFi')?.value||hoy(),
+    fechaTermino:fechaT,
     presupuesto:parseInt(document.getElementById('pPres')?.value)||0,
     gastado:0
   };
@@ -2487,12 +2489,12 @@ document.addEventListener('DOMContentLoaded',async ()=>{
   },1000);
   load(); // Cargar localStorage primero (rápido)
   setInterval(()=>{save();},30000);
-// Verificar Sheets cada 2 minutos
+// Verificar Sheets cada 1 minuto
 setInterval(async ()=>{
   if(SHEETS_URL && CU){
     await cargarDesdeSheets();
   }
-},120000);
+},60000);
 // Detectar cambio de día y actualizar vistas
 let _diaActual=new Date().toDateString();
 setInterval(()=>{
